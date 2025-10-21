@@ -1,6 +1,6 @@
 package com.richmax.dovenet.repository;
 
-import com.richmax.dovenet.model.Pigeon;
+import com.richmax.dovenet.repository.data.Pigeon;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 

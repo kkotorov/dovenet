@@ -1,7 +1,7 @@
 package com.richmax.dovenet.controller;
 
-import com.richmax.dovenet.model.Pigeon;
-import com.richmax.dovenet.service.PigeonService;
+import com.richmax.dovenet.repository.data.Pigeon;
+import com.richmax.dovenet.service.impl.PigeonServiceImpl;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,9 +10,9 @@ import java.util.List;
 @RequestMapping("/api/pigeons")
 @CrossOrigin(origins = "*")
 public class PigeonController {
-    private final PigeonService pigeonService;
+    private final PigeonServiceImpl pigeonService;
 
-    public PigeonController(PigeonService pigeonService) {
+    public PigeonController(PigeonServiceImpl pigeonService) {
         this.pigeonService = pigeonService;
     }
 

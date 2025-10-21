@@ -1,8 +1,7 @@
-package com.richmax.dovenet.model;
+package com.richmax.dovenet.repository.data;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Getter;
 import lombok.Setter;
 
 @Entity
@@ -22,16 +21,4 @@ public class Pigeon {
 
     private long fatherId;
     private long motherId;
-
-    public Pigeon(Long ringNumber, String name, String color, String gender, String status) {
-        this.ringNumber = ringNumber;
-        this.name = name;
-        this.color = color;
-        this.gender = gender;
-        this.status = status;
-    }
-
-    // Default constructor required by JPA
-    public Pigeon() {
-    }
 }
