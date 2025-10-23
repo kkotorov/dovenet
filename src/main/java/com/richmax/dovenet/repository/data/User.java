@@ -3,8 +3,11 @@ package com.richmax.dovenet.repository.data;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Data
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,14 +19,6 @@ public class User {
     private String email;
     private String password;
 
-    // Default constructor (required by JPA)
-    public User() {
-    }
-
-    //Custom constructor for easier creation
-    public User(String username, String email, String password) {
-        this.username = username;
-        this.email = email;
-        this.password = password;
-    }
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
+    private List<Pigeon> pigeons;
 }

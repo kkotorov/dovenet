@@ -21,4 +21,8 @@ public class Pigeon {
 
     private long fatherId;
     private long motherId;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private User owner;
 }

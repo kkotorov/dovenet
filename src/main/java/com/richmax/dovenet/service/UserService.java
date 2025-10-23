@@ -13,4 +13,6 @@ public interface UserService {
      * @return the saved User entity
      */
     User registerUser(String username, String email, String password);
+    User findByUsername(String username);
+    User findById(Long id);
 }
