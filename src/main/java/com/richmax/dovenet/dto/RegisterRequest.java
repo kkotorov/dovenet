@@ -1,4 +1,4 @@
-package com.richmax.dovenet.service.data;
+package com.richmax.dovenet.dto;
 
 import lombok.Data;
 

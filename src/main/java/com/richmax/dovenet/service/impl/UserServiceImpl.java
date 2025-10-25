@@ -43,6 +43,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id).orElse(null);
     }
 
+    @Override
     public UserDTO convertToDto(User user) {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());

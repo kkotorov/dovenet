@@ -2,7 +2,7 @@ package com.richmax.dovenet.controller;
 
 import com.richmax.dovenet.repository.data.User;
 import com.richmax.dovenet.service.UserService;
-import com.richmax.dovenet.service.data.RegisterRequest;
+import com.richmax.dovenet.dto.RegisterRequest;
 import com.richmax.dovenet.service.data.UserDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +24,6 @@ public class UserController {
         UserDTO dto = userService.convertToDto(user);
         return ResponseEntity.ok(dto);
     }
-
 
     // Get user by username
     @GetMapping("/{username}")
