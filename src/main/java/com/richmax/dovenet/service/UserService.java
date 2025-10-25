@@ -1,6 +1,7 @@
 package com.richmax.dovenet.service;
 
 import com.richmax.dovenet.repository.data.User;
+import com.richmax.dovenet.service.data.UserDTO;
 
 public interface UserService {
 
@@ -15,4 +16,5 @@ public interface UserService {
     User registerUser(String username, String email, String password);
     User findByUsername(String username);
     User findById(Long id);
+    UserDTO convertToDto(User user);
 }

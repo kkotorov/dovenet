@@ -1,16 +1,20 @@
 package com.richmax.dovenet.service.impl;
 
-import com.richmax.dovenet.repository.UserRepository;
 import com.richmax.dovenet.repository.data.User;
+import com.richmax.dovenet.repository.UserRepository;
 import com.richmax.dovenet.service.UserService;
+import com.richmax.dovenet.service.data.UserDTO;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -24,7 +28,8 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
-        user.setPassword(password); // later you’ll hash this
+        user.setPassword(passwordEncoder.encode(password)); // ✅ encrypt password
+
         return userRepository.save(user);
     }
 
@@ -37,4 +42,13 @@ public class UserServiceImpl implements UserService {
     public User findById(Long id) {
         return userRepository.findById(id).orElse(null);
     }
+
+    public UserDTO convertToDto(User user) {
+        UserDTO dto = new UserDTO();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        return dto;
+    }
+
 }
