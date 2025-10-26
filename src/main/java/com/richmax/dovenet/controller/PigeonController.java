@@ -20,6 +20,12 @@ public class PigeonController {
         return pigeonService.getAllPigeons(authentication.getName());
     }
 
+    @GetMapping("/{id}")
+    public PigeonDTO getPigeonById(@PathVariable Long id, Authentication authentication) {
+        return pigeonService.getPigeonById(id, authentication.getName());
+    }
+
+
     @PostMapping
     public PigeonDTO createPigeon(@RequestBody PigeonDTO pigeonDTO, Authentication authentication) {
         return pigeonService.createPigeon(pigeonDTO, authentication.getName());

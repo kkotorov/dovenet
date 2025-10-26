@@ -1,6 +1,8 @@
 package com.richmax.dovenet.service.impl;
 
 import com.richmax.dovenet.exception.PigeonNotFoundException;
+import com.richmax.dovenet.exception.UnauthorizedActionException;
+import com.richmax.dovenet.exception.UserNotFoundException;
 import com.richmax.dovenet.mapper.PigeonMapper;
 import com.richmax.dovenet.repository.UserRepository;
 import com.richmax.dovenet.repository.data.Pigeon;
@@ -36,6 +38,25 @@ public class PigeonServiceImpl implements PigeonService {
     }
 
     @Override
+    public PigeonDTO getPigeonById(Long id, String username) {
+        // Get user
+        User owner = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Username does not exist"));
+
+        // Find pigeon
+        Pigeon pigeon = pigeonRepository.findById(id)
+                .orElseThrow(() -> new PigeonNotFoundException("Pigeon with ID " + id + " does not exist"));
+
+        // Ensure it belongs to the authenticated user
+        if (!pigeon.getOwner().getId().equals(owner.getId())) {
+            throw new UnauthorizedActionException("You cannot access pigeons you don't own");
+        }
+
+        // Return DTO
+        return convertToDto(pigeon);
+    }
+
+    @Override
     public PigeonDTO createPigeon(PigeonDTO pigeonDTO, String username) {
         User owner = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Username does not exist"));
@@ -56,7 +77,7 @@ public class PigeonServiceImpl implements PigeonService {
         Pigeon pigeon = pigeonRepository.findById(id)
                 .orElseThrow(() -> new PigeonNotFoundException("Pigeon with ID " + id + " does not exist"));
         if (!pigeon.getOwner().getId().equals(owner.getId())) {
-            throw new RuntimeException("You cannot update pigeons you don’t own");
+            throw new UnauthorizedActionException("You cannot update pigeons you don’t own");
         }
 
         // Update allowed fields
@@ -77,7 +98,6 @@ public class PigeonServiceImpl implements PigeonService {
 
         return convertToDto(pigeonRepository.save(pigeon));
     }
-
 
     @Override
     public void deletePigeon(Long id, String username) {
