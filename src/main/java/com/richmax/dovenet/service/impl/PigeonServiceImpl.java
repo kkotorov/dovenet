@@ -1,18 +1,12 @@
 package com.richmax.dovenet.service.impl;
 
 import com.richmax.dovenet.exception.PigeonNotFoundException;
-import com.richmax.dovenet.exception.UserNotFoundException;
 import com.richmax.dovenet.mapper.PigeonMapper;
 import com.richmax.dovenet.repository.data.Pigeon;
 import com.richmax.dovenet.repository.PigeonRepository;
-import com.richmax.dovenet.repository.data.User;
 import com.richmax.dovenet.service.PigeonService;
-import com.richmax.dovenet.service.UserService;
 import com.richmax.dovenet.service.data.PigeonDTO;
-import com.richmax.dovenet.service.data.UserDTO;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class PigeonServiceImpl implements PigeonService {

@@ -7,7 +7,6 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface PigeonMapper {
 
-    //PigeonMapper INSTANCE = Mappers.getMapper(PigeonMapper.class);
     PigeonDTO toDto(Pigeon pigeon);
     Pigeon toEntity(PigeonDTO pigeonDTO);
 }
