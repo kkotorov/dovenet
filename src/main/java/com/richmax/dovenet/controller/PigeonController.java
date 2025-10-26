@@ -2,6 +2,10 @@ package com.richmax.dovenet.controller;
 
 import com.richmax.dovenet.service.PigeonService;
 import com.richmax.dovenet.service.data.PigeonDTO;
+import com.richmax.dovenet.service.data.PigeonPedigreeDTO;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -45,4 +49,21 @@ public class PigeonController {
     public void deletePigeon(@PathVariable Long id, Authentication authentication) {
         pigeonService.deletePigeon(id, authentication.getName());
     }
+
+    @GetMapping("/{id}/pedigree")
+    public PigeonPedigreeDTO getPedigree(@PathVariable Long id, Authentication authentication) {
+        return pigeonService.getPedigree(id, authentication.getName());
+    }
+
+
+    @GetMapping("/{id}/pedigree/pdf")
+    public ResponseEntity<byte[]> downloadPedigreePdf(@PathVariable Long id, Authentication authentication) {
+        byte[] pdfBytes = pigeonService.generatePedigreePdf(id, authentication.getName());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=pedigree_" + id + ".pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
+    }
+
 }

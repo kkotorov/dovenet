@@ -10,10 +10,17 @@ import com.richmax.dovenet.repository.PigeonRepository;
 import com.richmax.dovenet.repository.data.User;
 import com.richmax.dovenet.service.PigeonService;
 import com.richmax.dovenet.service.data.PigeonDTO;
+import com.richmax.dovenet.service.data.PigeonPedigreeDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
+
+
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.*;
+import java.awt.Color;
+import java.io.ByteArrayOutputStream;
+import java.time.LocalDate;
 
 @Service
 public class PigeonServiceImpl implements PigeonService {
@@ -121,4 +128,130 @@ public class PigeonServiceImpl implements PigeonService {
     public Pigeon convertToEntity(PigeonDTO pigeonDTO) {
         return pigeonMapper.toEntity(pigeonDTO);
     }
+
+    @Override
+    public PigeonPedigreeDTO getPedigree(Long pigeonId, String username) {
+        User owner = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Username does not exist"));
+
+        Pigeon pigeon = pigeonRepository.findById(pigeonId)
+                .orElseThrow(() -> new PigeonNotFoundException("Pigeon not found"));
+
+        if (!pigeon.getOwner().getId().equals(owner.getId())) {
+            throw new UnauthorizedActionException("You cannot view pedigrees of pigeons you don't own");
+        }
+
+        PigeonPedigreeDTO pedigree = new PigeonPedigreeDTO();
+        pedigree.setPigeon(convertToDto(pigeon));
+
+        // Parents
+        Pigeon father = pigeonRepository.findByRingNumber(pigeon.getFatherRingNumber()).orElse(null);
+        Pigeon mother = pigeonRepository.findByRingNumber(pigeon.getMotherRingNumber()).orElse(null);
+        if (father != null) pedigree.setFather(convertToDto(father));
+        if (mother != null) pedigree.setMother(convertToDto(mother));
+
+        // Grandparents (if parents exist)
+        if (father != null) {
+            Pigeon paternalGrandfather = pigeonRepository.findByRingNumber(father.getFatherRingNumber()).orElse(null);
+            Pigeon paternalGrandmother = pigeonRepository.findByRingNumber(father.getMotherRingNumber()).orElse(null);
+            if (paternalGrandfather != null) pedigree.setPaternalGrandfather(convertToDto(paternalGrandfather));
+            if (paternalGrandmother != null) pedigree.setPaternalGrandmother(convertToDto(paternalGrandmother));
+        }
+        if (mother != null) {
+            Pigeon maternalGrandfather = pigeonRepository.findByRingNumber(mother.getFatherRingNumber()).orElse(null);
+            Pigeon maternalGrandmother = pigeonRepository.findByRingNumber(mother.getMotherRingNumber()).orElse(null);
+            if (maternalGrandfather != null) pedigree.setMaternalGrandfather(convertToDto(maternalGrandfather));
+            if (maternalGrandmother != null) pedigree.setMaternalGrandmother(convertToDto(maternalGrandmother));
+        }
+
+        return pedigree;
+    }
+
+    @Override
+    public byte[] generatePedigreePdf(Long id, String username) {
+        PigeonPedigreeDTO pedigree = getPedigree(id, username);
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            Document document = new Document(PageSize.A4);
+            PdfWriter.getInstance(document, baos);
+            document.open();
+
+            // Title
+            Font titleFont = new Font(Font.HELVETICA, 18, Font.BOLD);
+            Font labelFont = new Font(Font.HELVETICA, 12, Font.BOLD);
+            Font textFont = new Font(Font.HELVETICA, 12);
+            Paragraph title = new Paragraph("Pigeon Pedigree", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            document.add(title);
+            document.add(Chunk.NEWLINE);
+
+            // Create a 3-column layout (grandparents - parents - pigeon)
+            PdfPTable table = new PdfPTable(3);
+            table.setWidthPercentage(100);
+            table.setWidths(new float[]{1.5f, 1.5f, 2f});
+
+            // --- Grandparents Row ---
+            table.addCell(createPedigreeBox("Paternal Grandfather", pedigree.getPaternalGrandfather(), labelFont, textFont));
+            table.addCell("");
+            table.addCell(createPedigreeBox("Maternal Grandfather", pedigree.getMaternalGrandfather(), labelFont, textFont));
+
+            table.addCell(createPedigreeBox("Paternal Grandmother", pedigree.getPaternalGrandmother(), labelFont, textFont));
+            table.addCell("");
+            table.addCell(createPedigreeBox("Maternal Grandmother", pedigree.getMaternalGrandmother(), labelFont, textFont));
+
+            // --- Parents Row ---
+            PdfPCell fatherCell = createPedigreeBox("Father", pedigree.getFather(), labelFont, textFont);
+            fatherCell.setRowspan(1);
+            PdfPCell motherCell = createPedigreeBox("Mother", pedigree.getMother(), labelFont, textFont);
+            motherCell.setRowspan(1);
+
+            table.addCell(fatherCell);
+            table.addCell("");
+            table.addCell(motherCell);
+
+            // --- Main Pigeon Row ---
+            PdfPCell mainPigeonCell = createPedigreeBox("Main Pigeon", pedigree.getPigeon(), labelFont, textFont);
+            mainPigeonCell.setColspan(3);
+            mainPigeonCell.setBackgroundColor(Color.LIGHT_GRAY);
+            mainPigeonCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(mainPigeonCell);
+
+            document.add(table);
+
+            document.add(Chunk.NEWLINE);
+            Paragraph footer = new Paragraph("Generated on: " + LocalDate.now(), textFont);
+            footer.setAlignment(Element.ALIGN_RIGHT);
+            document.add(footer);
+
+            document.close();
+            return baos.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException("Error generating pedigree PDF", e);
+        }
+    }
+
+    private PdfPCell createPedigreeBox(String title, PigeonDTO pigeon, Font labelFont, Font textFont) {
+        PdfPCell cell = new PdfPCell();
+        cell.setPadding(8);
+        cell.setBorderColor(Color.DARK_GRAY);
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+
+        Paragraph titlePara = new Paragraph(title, labelFont);
+        titlePara.setAlignment(Element.ALIGN_CENTER);
+        cell.addElement(titlePara);
+
+        if (pigeon != null) {
+            cell.addElement(new Paragraph("Name: " + pigeon.getName(), textFont));
+            cell.addElement(new Paragraph("Ring #: " + pigeon.getRingNumber(), textFont));
+            if (pigeon.getColor() != null) cell.addElement(new Paragraph("Color: " + pigeon.getColor(), textFont));
+            if (pigeon.getGender() != null) cell.addElement(new Paragraph("Gender: " + pigeon.getGender(), textFont));
+            if (pigeon.getBirthDate() != null) cell.addElement(new Paragraph("Born: " + pigeon.getBirthDate(), textFont));
+        } else {
+            cell.addElement(new Paragraph("Unknown", textFont));
+        }
+
+        return cell;
+    }
+
+
 }
