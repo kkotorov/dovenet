@@ -1,6 +1,7 @@
 package com.richmax.dovenet.controller;
 
 import com.richmax.dovenet.dto.LoginRequest;
+import com.richmax.dovenet.exception.UserNotFoundException;
 import com.richmax.dovenet.repository.data.User;
 import com.richmax.dovenet.security.JwtUtil;
 import com.richmax.dovenet.service.UserService;
@@ -27,7 +28,7 @@ public class AuthController {
     public Map<String, String> login(@RequestBody LoginRequest request) {
         User user = userService.findByUsername(request.getUsername());
         if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid username or password");
+            throw new UserNotFoundException("Invalid username or password");
         }
 
         String token = jwtUtil.generateToken(user.getUsername());

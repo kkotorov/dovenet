@@ -1,12 +1,10 @@
 package com.richmax.dovenet.controller;
 
-import com.richmax.dovenet.exception.UserAlreadyExistsException;
 import com.richmax.dovenet.repository.data.User;
 import com.richmax.dovenet.security.JwtUtil;
 import com.richmax.dovenet.service.UserService;
 import com.richmax.dovenet.dto.RegisterRequest;
 import com.richmax.dovenet.service.data.UserDTO;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,11 +35,4 @@ public class UserController {
         User user = userService.findByUsername(username);
         return userService.convertToDto(user);
     }
-
-    @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<String> handleUserAlreadyExists(UserAlreadyExistsException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
-    }
-
-
 }

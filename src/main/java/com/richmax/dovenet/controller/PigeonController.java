@@ -1,14 +1,11 @@
 package com.richmax.dovenet.controller;
 
-import com.richmax.dovenet.exception.PigeonNotFoundException;
 import com.richmax.dovenet.repository.PigeonRepository;
 import com.richmax.dovenet.repository.UserRepository;
 import com.richmax.dovenet.repository.data.Pigeon;
 import com.richmax.dovenet.repository.data.User;
 import com.richmax.dovenet.service.PigeonService;
 import com.richmax.dovenet.service.data.PigeonDTO;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -68,10 +65,5 @@ public class PigeonController {
         }
 
         pigeonService.deletePigeon(id);
-    }
-
-    @ExceptionHandler(PigeonNotFoundException.class)
-    public ResponseEntity<String> handlePigeonNotFound(PigeonNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 }
