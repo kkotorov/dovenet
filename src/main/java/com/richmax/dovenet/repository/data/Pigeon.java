@@ -19,8 +19,8 @@ public class Pigeon {
     private String gender;
     private String status; //alive, deceased, sold, active, etc
 
-    private long fatherId;
-    private long motherId;
+    private Long fatherId;
+    private Long motherId;
 
     @ManyToOne
     @JoinColumn(name = "owner_id")

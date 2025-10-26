@@ -2,6 +2,7 @@ package com.richmax.dovenet.service.impl;
 
 import com.richmax.dovenet.exception.UserAlreadyExistsException;
 import com.richmax.dovenet.exception.UserNotFoundException;
+import com.richmax.dovenet.mapper.UserMapper;
 import com.richmax.dovenet.repository.data.User;
 import com.richmax.dovenet.repository.UserRepository;
 import com.richmax.dovenet.service.UserService;
@@ -13,10 +14,12 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -48,20 +51,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO convertToDto(User user) {
-        UserDTO dto = new UserDTO();
-        dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
-        dto.setEmail(user.getEmail());
-        return dto;
+        return userMapper.toDto(user);
     }
 
     @Override
     public User convertToEntity(UserDTO userDTO) {
-        User user = new User();
-        user.setId(userDTO.getId());
-        user.setUsername(userDTO.getUsername());
-        user.setEmail(userDTO.getEmail());
-        return user;
+        return userMapper.toEntity(userDTO);
     }
-
 }
