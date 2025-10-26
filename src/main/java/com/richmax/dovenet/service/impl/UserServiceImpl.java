@@ -1,5 +1,7 @@
 package com.richmax.dovenet.service.impl;
 
+import com.richmax.dovenet.exception.UserAlreadyExistsException;
+import com.richmax.dovenet.exception.UserNotFoundException;
 import com.richmax.dovenet.repository.data.User;
 import com.richmax.dovenet.repository.UserRepository;
 import com.richmax.dovenet.service.UserService;
@@ -20,9 +22,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public User registerUser(String username, String email, String password) {
         if (userRepository.findByUsername(username).isPresent()) {
-            throw new RuntimeException("Username already exists");
+            throw new UserAlreadyExistsException("Username already exists");
         } else if (userRepository.findByEmail(email).isPresent()) {
-            throw new RuntimeException("Email already exists");
+            throw new UserAlreadyExistsException("Email already exists");
         }
 
         User user = new User();
@@ -35,7 +37,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findByUsername(String username) {
-        return userRepository.findByUsername(username).orElse(null);
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User " + username + " not found"));
     }
 
     @Override
@@ -50,6 +53,15 @@ public class UserServiceImpl implements UserService {
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
         return dto;
+    }
+
+    @Override
+    public User convertToEntity(UserDTO userDTO) {
+        User user = new User();
+        user.setId(userDTO.getId());
+        user.setUsername(userDTO.getUsername());
+        user.setEmail(userDTO.getEmail());
+        return user;
     }
 
 }

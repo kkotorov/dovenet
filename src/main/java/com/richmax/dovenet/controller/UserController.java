@@ -1,9 +1,12 @@
 package com.richmax.dovenet.controller;
 
+import com.richmax.dovenet.exception.UserAlreadyExistsException;
 import com.richmax.dovenet.repository.data.User;
+import com.richmax.dovenet.security.JwtUtil;
 import com.richmax.dovenet.service.UserService;
 import com.richmax.dovenet.dto.RegisterRequest;
 import com.richmax.dovenet.service.data.UserDTO;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,9 +15,11 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*")
 public class UserController {
     private final UserService userService;
+    private final JwtUtil jwtUtil;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, JwtUtil jwtUtil) {
         this.userService = userService;
+        this.jwtUtil = jwtUtil;
     }
 
     // Register user
@@ -25,20 +30,18 @@ public class UserController {
         return ResponseEntity.ok(dto);
     }
 
-    // Get user by username
-    @GetMapping("/{username}")
-    public UserDTO getUser(@PathVariable String username) {
+    @GetMapping("/me")
+    public UserDTO getCurrentUser(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String username = jwtUtil.extractUsername(token);
         User user = userService.findByUsername(username);
-        if (user == null) {
-            throw new RuntimeException("User not found");
-        }
-
-        // Map User -> UserDto
-        UserDTO dto = new UserDTO();
-        dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
-        dto.setEmail(user.getEmail());
-        return dto;
+        return userService.convertToDto(user);
     }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<String> handleUserAlreadyExists(UserAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
 
 }

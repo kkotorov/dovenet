@@ -17,4 +17,5 @@ public interface UserService {
     User findByUsername(String username);
     User findById(Long id);
     UserDTO convertToDto(User user);
+    User convertToEntity(UserDTO userDTO);
 }
