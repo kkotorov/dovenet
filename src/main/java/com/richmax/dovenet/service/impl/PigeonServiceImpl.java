@@ -252,6 +252,4 @@ public class PigeonServiceImpl implements PigeonService {
 
         return cell;
     }
-
-
 }

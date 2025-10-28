@@ -17,7 +17,7 @@ public class Pigeon {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private Long ringNumber;
+    private String ringNumber;
 
     private String name;
     private String color;
@@ -26,8 +26,8 @@ public class Pigeon {
 
     private LocalDate birthDate;
 
-    private Long fatherRingNumber;
-    private Long motherRingNumber;
+    private String fatherRingNumber;
+    private String motherRingNumber;
 
     @ManyToOne
     @JoinColumn(name = "owner_id")

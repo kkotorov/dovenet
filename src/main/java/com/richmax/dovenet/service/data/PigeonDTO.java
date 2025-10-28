@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 public class PigeonDTO {
     private Long id;
-    private Long ringNumber;
+    private String ringNumber;
 
     private String name;
     private String color;
@@ -19,8 +19,8 @@ public class PigeonDTO {
 
     private LocalDate birthDate;
 
-    private Long fatherRingNumber;
-    private Long motherRingNumber;
+    private String fatherRingNumber;
+    private String motherRingNumber;
 
     private UserDTO owner;
     private List<Competition> competitions = new ArrayList<>();

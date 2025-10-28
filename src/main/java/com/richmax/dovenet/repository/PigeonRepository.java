@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface PigeonRepository extends JpaRepository<Pigeon, Long> {
     // --- ID / Ring Number ---
-    Optional<Pigeon> findByRingNumber(Long ringNumber);
+    Optional<Pigeon> findByRingNumber(String ringNumber);
 
     // --- Name ---
     List<Pigeon> findByNameIgnoreCase(String name);
@@ -38,8 +38,8 @@ public interface PigeonRepository extends JpaRepository<Pigeon, Long> {
     List<Pigeon> findByBirthDateBetween(LocalDate start, LocalDate end);
 
     // --- Father / Mother ---
-    List<Pigeon> findByFatherRingNumber(Long fatherRingNumber);
-    List<Pigeon> findByMotherRingNumber(Long motherRingNumber);
+    List<Pigeon> findByFatherRingNumber(String fatherRingNumber);
+    List<Pigeon> findByMotherRingNumber(String motherRingNumber);
 
     // --- Associations ---
     List<Pigeon> findByOwner(User owner);
