@@ -172,84 +172,78 @@ public class PigeonServiceImpl implements PigeonService {
         PigeonPedigreeDTO pedigree = getPedigree(id, username);
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            Document document = new Document(PageSize.A4);
-            PdfWriter.getInstance(document, baos);
-            document.open();
+            PdfReader reader = new PdfReader("templates/DOVENET_pedigree.pdf");
+            PdfStamper stamper = new PdfStamper(reader, baos);
+            PdfContentByte canvas = stamper.getOverContent(1); // first page
 
-            // Title
-            Font titleFont = new Font(Font.HELVETICA, 18, Font.BOLD);
-            Font labelFont = new Font(Font.HELVETICA, 12, Font.BOLD);
-            Font textFont = new Font(Font.HELVETICA, 12);
-            Paragraph title = new Paragraph("Pigeon Pedigree", titleFont);
-            title.setAlignment(Element.ALIGN_CENTER);
-            document.add(title);
-            document.add(Chunk.NEWLINE);
+            BaseFont bf = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.CP1252, BaseFont.EMBEDDED);
+            canvas.setFontAndSize(bf, 12);
+            canvas.setColorFill(Color.BLACK);
 
-            // Create a 3-column layout (grandparents - parents - pigeon)
-            PdfPTable table = new PdfPTable(3);
-            table.setWidthPercentage(100);
-            table.setWidths(new float[]{1.5f, 1.5f, 2f});
+            // Example text overlay
+            if(pedigree.getPigeon() != null) {
+                fillPigeonBox(pedigree.getPigeon(), canvas, 20, 480);
+            }
 
-            // --- Grandparents Row ---
-            table.addCell(createPedigreeBox("Paternal Grandfather", pedigree.getPaternalGrandfather(), labelFont, textFont));
-            table.addCell("");
-            table.addCell(createPedigreeBox("Maternal Grandfather", pedigree.getMaternalGrandfather(), labelFont, textFont));
+            if (pedigree.getFather() != null) {
+                fillPigeonBox(pedigree.getFather(), canvas,160, 650);
+            }
 
-            table.addCell(createPedigreeBox("Paternal Grandmother", pedigree.getPaternalGrandmother(), labelFont, textFont));
-            table.addCell("");
-            table.addCell(createPedigreeBox("Maternal Grandmother", pedigree.getMaternalGrandmother(), labelFont, textFont));
+            if (pedigree.getMother() != null) {
+                fillPigeonBox(pedigree.getMother(), canvas, 160, 290);
+            }
 
-            // --- Parents Row ---
-            PdfPCell fatherCell = createPedigreeBox("Father", pedigree.getFather(), labelFont, textFont);
-            fatherCell.setRowspan(1);
-            PdfPCell motherCell = createPedigreeBox("Mother", pedigree.getMother(), labelFont, textFont);
-            motherCell.setRowspan(1);
+            if(pedigree.getPaternalGrandfather() != null) {
+                fillPigeonBox(pedigree.getPaternalGrandfather(), canvas, 305, 745);
+            }
 
-            table.addCell(fatherCell);
-            table.addCell("");
-            table.addCell(motherCell);
+            if (pedigree.getPaternalGrandmother() != null) {
+                fillPigeonBox(pedigree.getPaternalGrandmother(), canvas, 305, 560);
+            }
 
-            // --- Main Pigeon Row ---
-            PdfPCell mainPigeonCell = createPedigreeBox("Main Pigeon", pedigree.getPigeon(), labelFont, textFont);
-            mainPigeonCell.setColspan(3);
-            mainPigeonCell.setBackgroundColor(Color.LIGHT_GRAY);
-            mainPigeonCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            table.addCell(mainPigeonCell);
+            if (pedigree.getMaternalGrandfather() != null) {
+                fillPigeonBox(pedigree.getMaternalGrandfather(), canvas, 305, 380);
+            }
 
-            document.add(table);
+            if  (pedigree.getMaternalGrandmother() != null) {
+                fillPigeonBox(pedigree.getMaternalGrandmother(), canvas, 305, 200);
+            }
 
-            document.add(Chunk.NEWLINE);
-            Paragraph footer = new Paragraph("Generated on: " + LocalDate.now(), textFont);
-            footer.setAlignment(Element.ALIGN_RIGHT);
-            document.add(footer);
-
-            document.close();
+            stamper.close();
+            reader.close();
             return baos.toByteArray();
+
         } catch (Exception e) {
             throw new RuntimeException("Error generating pedigree PDF", e);
         }
     }
 
-    private PdfPCell createPedigreeBox(String title, PigeonDTO pigeon, Font labelFont, Font textFont) {
-        PdfPCell cell = new PdfPCell();
-        cell.setPadding(8);
-        cell.setBorderColor(Color.DARK_GRAY);
-        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+    private void addText(PdfContentByte canvas, float x, float y, String text, int fontSize, boolean bold) {
+        if (text == null) return;
+        try {
+            BaseFont font = bold
+                    ? BaseFont.createFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.EMBEDDED)
+                    : BaseFont.createFont(BaseFont.HELVETICA, BaseFont.CP1252, BaseFont.EMBEDDED);
 
-        Paragraph titlePara = new Paragraph(title, labelFont);
-        titlePara.setAlignment(Element.ALIGN_CENTER);
-        cell.addElement(titlePara);
-
-        if (pigeon != null) {
-            cell.addElement(new Paragraph("Name: " + pigeon.getName(), textFont));
-            cell.addElement(new Paragraph("Ring #: " + pigeon.getRingNumber(), textFont));
-            if (pigeon.getColor() != null) cell.addElement(new Paragraph("Color: " + pigeon.getColor(), textFont));
-            if (pigeon.getGender() != null) cell.addElement(new Paragraph("Gender: " + pigeon.getGender(), textFont));
-            if (pigeon.getBirthDate() != null) cell.addElement(new Paragraph("Born: " + pigeon.getBirthDate(), textFont));
-        } else {
-            cell.addElement(new Paragraph("Unknown", textFont));
+            canvas.beginText();
+            canvas.setFontAndSize(font, fontSize);
+            canvas.showTextAligned(Element.ALIGN_LEFT, text, x, y, 0);
+            canvas.endText();
+        } catch (Exception e) {
+            throw new RuntimeException("Error writing text to PDF", e);
         }
-
-        return cell;
     }
+
+    private void fillPigeonBox(PigeonDTO pigeon, PdfContentByte canvas, int x, int y) {
+        String textName = "Name: " + pigeon.getName();
+        String textRing = "Ring: " + pigeon.getRingNumber();
+        String textColor = "Color: " + pigeon.getColor();
+        String textGender = "Gender: " + pigeon.getGender();
+
+        addText(canvas, x, y, textRing,10, true);
+        addText(canvas, x, y-20, textName,10,true);
+        addText(canvas, x, y-40, textGender,10, false);
+        addText(canvas, x, y-60, textColor,10,false);
+    }
+
 }
