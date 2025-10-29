@@ -17,6 +17,8 @@ public interface PigeonService {
 
     void deletePigeon(Long id, String username);
 
+    List<PigeonDTO> getPigeonParents(Long id, String username);
+
     PigeonDTO convertToDto(Pigeon pigeon);
 
     Pigeon convertToEntity(PigeonDTO pigeonDTO);

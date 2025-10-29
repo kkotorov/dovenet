@@ -38,8 +38,7 @@ public class PigeonController {
     public PigeonDTO updatePigeon(
             @PathVariable Long id,
             @RequestBody PigeonDTO pigeonDTO,
-            Authentication authentication
-    ) {
+            Authentication authentication) {
         String username = authentication.getName();
         return pigeonService.updatePigeon(id, pigeonDTO, username);
     }
@@ -47,6 +46,11 @@ public class PigeonController {
     @DeleteMapping("/{id}")
     public void deletePigeon(@PathVariable Long id, Authentication authentication) {
         pigeonService.deletePigeon(id, authentication.getName());
+    }
+
+    @GetMapping("/{id}/parents")
+    public List<PigeonDTO> getPigeonParents(@PathVariable Long id, Authentication authentication) {
+        return pigeonService.getPigeonParents(id, authentication.getName());
     }
 
     @GetMapping("/{id}/pedigree")

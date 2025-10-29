@@ -13,6 +13,7 @@ import com.richmax.dovenet.service.data.PigeonDTO;
 import com.richmax.dovenet.service.data.PigeonPedigreeDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -20,7 +21,6 @@ import com.lowagie.text.*;
 import com.lowagie.text.pdf.*;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
-import java.time.LocalDate;
 
 @Service
 public class PigeonServiceImpl implements PigeonService {
@@ -119,6 +119,42 @@ public class PigeonServiceImpl implements PigeonService {
         }
 
         pigeonRepository.deleteById(id);
+    }
+
+    public List<PigeonDTO> getPigeonParents(Long id, String username) {
+        // Validate user exists
+        User owner = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Username does not exist"));
+
+        // Find pigeon by ID and ensure ownership
+        Pigeon pigeon = pigeonRepository.findById(id)
+                .orElseThrow(() -> new PigeonNotFoundException("Pigeon does not exist"));
+
+        List<PigeonDTO> parents = new ArrayList<>();
+
+        // --- Father ---
+        if (pigeon.getFatherRingNumber() != null && !pigeon.getFatherRingNumber().isBlank()) {
+            pigeonRepository.findByRingNumber(pigeon.getFatherRingNumber())
+                    .ifPresentOrElse(
+                            father -> parents.add(convertToDto(father)),
+                            () -> {
+                                throw new PigeonNotFoundException("Father with ring number " + pigeon.getFatherRingNumber() + " does not exist");
+                            }
+                    );
+        }
+
+        // --- Mother ---
+        if (pigeon.getMotherRingNumber() != null && !pigeon.getMotherRingNumber().isBlank()) {
+            pigeonRepository.findByRingNumber(pigeon.getMotherRingNumber())
+                    .ifPresentOrElse(
+                            mother -> parents.add(convertToDto(mother)),
+                            () -> {
+                                throw new PigeonNotFoundException("Mother with ring number " + pigeon.getMotherRingNumber() + " does not exist");
+                            }
+                    );
+        }
+
+        return parents;
     }
 
     public PigeonDTO convertToDto(Pigeon pigeon) {
