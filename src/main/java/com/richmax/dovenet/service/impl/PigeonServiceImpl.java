@@ -208,7 +208,7 @@ public class PigeonServiceImpl implements PigeonService {
         PigeonPedigreeDTO pedigree = getPedigree(id, username);
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            PdfReader reader = new PdfReader("templates/DOVENET_pedigree.pdf");
+            PdfReader reader = new PdfReader("templates/Dovenet_pedigree_new.pdf");
             PdfStamper stamper = new PdfStamper(reader, baos);
             PdfContentByte canvas = stamper.getOverContent(1); // first page
 
@@ -218,7 +218,7 @@ public class PigeonServiceImpl implements PigeonService {
 
             // Example text overlay
             if(pedigree.getPigeon() != null) {
-                fillPigeonBox(pedigree.getPigeon(), canvas, 20, 480);
+                fillPigeonBox(pedigree.getPigeon(), canvas, 20, 500);
             }
 
             if (pedigree.getFather() != null) {
@@ -245,12 +245,62 @@ public class PigeonServiceImpl implements PigeonService {
                 fillPigeonBox(pedigree.getMaternalGrandmother(), canvas, 305, 200);
             }
 
+            PigeonPedigreeDTO fatherPedigree = getPedigree(pedigree.getFather().getId(), username);
+            PigeonPedigreeDTO motherPedigree = getPedigree(pedigree.getMother().getId(), username);
+            if(fatherPedigree != null) {
+                if(fatherPedigree.getPaternalGrandfather() != null) {
+                    fillPigeonBox(fatherPedigree.getPaternalGrandfather(), canvas, 450, 750);
+                }
+
+                if (fatherPedigree.getPaternalGrandmother() != null) {
+                    fillPigeonBox(fatherPedigree.getPaternalGrandmother(), canvas, 450, 660);
+                }
+
+                if (fatherPedigree.getMaternalGrandfather() != null) {
+                    fillPigeonBox(fatherPedigree.getMaternalGrandfather(), canvas, 450, 569);
+                }
+
+                if  (fatherPedigree.getMaternalGrandmother() != null) {
+                    fillPigeonBox(fatherPedigree.getMaternalGrandmother(), canvas, 450, 478);
+                }
+            }
+
+
+            if(motherPedigree != null) {
+                if(motherPedigree.getPaternalGrandfather() != null) {
+                    fillPigeonBox(motherPedigree.getPaternalGrandfather(), canvas, 450, 388);
+                }
+
+                if (motherPedigree.getPaternalGrandmother() != null) {
+                    fillPigeonBox(motherPedigree.getPaternalGrandmother(), canvas, 450, 297);
+                }
+
+                if (motherPedigree.getMaternalGrandfather() != null) {
+                    fillPigeonBox(motherPedigree.getMaternalGrandfather(), canvas, 450, 208);
+                }
+
+                if  (motherPedigree.getMaternalGrandmother() != null) {
+                    fillPigeonBox(motherPedigree.getMaternalGrandmother(), canvas, 450, 118);
+                }
+            }
+
+            // Add logo image
+            Image logo = Image.getInstance(getClass().getResource("/templates/dovenet.jpeg"));
+
+            // Scale the image (for example, 20% of original size)
+            logo.scalePercent(10);
+
+            logo.setAbsolutePosition(20, 750);
+
+            canvas.addImage(logo);
+
             stamper.close();
             reader.close();
             return baos.toByteArray();
 
         } catch (Exception e) {
-            throw new RuntimeException("Error generating pedigree PDF", e);
+            e.printStackTrace(); // log to console
+            throw new RuntimeException("Error generating pedigree PDF: " + e.getMessage(), e);
         }
     }
 
@@ -276,10 +326,10 @@ public class PigeonServiceImpl implements PigeonService {
         String textColor = "Color: " + pigeon.getColor();
         String textGender = "Gender: " + pigeon.getGender();
 
-        addText(canvas, x, y, textRing,10, true);
-        addText(canvas, x, y-20, textName,10,true);
-        addText(canvas, x, y-40, textGender,10, false);
-        addText(canvas, x, y-60, textColor,10,false);
+        addText(canvas, x, y, textRing,8, true);
+        addText(canvas, x, y-20, textName,8,true);
+        addText(canvas, x, y-40, textGender,8, false);
+        addText(canvas, x, y-60, textColor,8,false);
     }
 
 }
