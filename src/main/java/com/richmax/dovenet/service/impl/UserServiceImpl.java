@@ -58,4 +58,35 @@ public class UserServiceImpl implements UserService {
     public User convertToEntity(UserDTO userDTO) {
         return userMapper.toEntity(userDTO);
     }
+
+    @Override
+    public User changeEmail(String username, String newEmail, String currentPassword) {
+        User user = findByUsername(username);
+
+        // Verify password
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Invalid password");
+        }
+
+        // Check if email is already used
+        if (userRepository.findByEmail(newEmail).isPresent()) {
+            throw new IllegalArgumentException("Email already in use");
+        }
+
+        user.setEmail(newEmail);
+        return userRepository.save(user);
+    }
+
+    @Override
+    public User changePassword(String username, String oldPassword, String newPassword) {
+        User user = findByUsername(username);
+
+        // Verify old password
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Invalid current password");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        return userRepository.save(user);
+    }
 }

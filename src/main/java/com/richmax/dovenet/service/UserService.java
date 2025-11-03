@@ -18,4 +18,6 @@ public interface UserService {
     User findById(Long id);
     UserDTO convertToDto(User user);
     User convertToEntity(UserDTO userDTO);
+    User changeEmail(String username, String newEmail, String currentPassword);
+    User changePassword(String username, String oldPassword, String newPassword);
 }

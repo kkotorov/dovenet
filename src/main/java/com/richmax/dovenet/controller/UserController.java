@@ -1,5 +1,7 @@
 package com.richmax.dovenet.controller;
 
+import com.richmax.dovenet.dto.ChangeEmailRequest;
+import com.richmax.dovenet.dto.ChangePasswordRequest;
 import com.richmax.dovenet.repository.data.User;
 import com.richmax.dovenet.security.JwtUtil;
 import com.richmax.dovenet.service.UserService;
@@ -34,5 +36,21 @@ public class UserController {
         String username = jwtUtil.extractUsername(token);
         User user = userService.findByUsername(username);
         return userService.convertToDto(user);
+    }
+
+    @PatchMapping("/me/change-email")
+    public ResponseEntity<UserDTO> changeEmail(@RequestHeader("Authorization") String authHeader,
+                                               @RequestBody ChangeEmailRequest request) {
+        String username = jwtUtil.extractUsername(authHeader.replace("Bearer ", ""));
+        User updatedUser = userService.changeEmail(username, request.getNewEmail(), request.getPassword());
+        return ResponseEntity.ok(userService.convertToDto(updatedUser));
+    }
+
+    @PatchMapping("/me/change-password")
+    public ResponseEntity<UserDTO> changePassword(@RequestHeader("Authorization") String authHeader,
+                                                  @RequestBody ChangePasswordRequest request) {
+        String username = jwtUtil.extractUsername(authHeader.replace("Bearer ", ""));
+        User updatedUser = userService.changePassword(username, request.getOldPassword(), request.getNewPassword());
+        return ResponseEntity.ok(userService.convertToDto(updatedUser));
     }
 }
