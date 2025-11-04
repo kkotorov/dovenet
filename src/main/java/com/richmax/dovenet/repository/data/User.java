@@ -3,6 +3,7 @@ package com.richmax.dovenet.repository.data;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -21,4 +22,10 @@ public class User {
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     private List<Pigeon> pigeons;
+
+    // --- Fields for forgot password ---
+    @Column(unique = true)
+    private String resetToken;
+
+    private LocalDateTime resetTokenExpiry;
 }

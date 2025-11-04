@@ -1,11 +1,9 @@
 package com.richmax.dovenet.controller;
 
-import com.richmax.dovenet.dto.ChangeEmailRequest;
-import com.richmax.dovenet.dto.ChangePasswordRequest;
+import com.richmax.dovenet.dto.*;
 import com.richmax.dovenet.repository.data.User;
 import com.richmax.dovenet.security.JwtUtil;
 import com.richmax.dovenet.service.UserService;
-import com.richmax.dovenet.dto.RegisterRequest;
 import com.richmax.dovenet.service.data.UserDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,5 +50,20 @@ public class UserController {
         String username = jwtUtil.extractUsername(authHeader.replace("Bearer ", ""));
         User updatedUser = userService.changePassword(username, request.getOldPassword(), request.getNewPassword());
         return ResponseEntity.ok(userService.convertToDto(updatedUser));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        userService.initiatePasswordReset(request.getEmail());
+        return ResponseEntity.ok("Password reset email sent if the email exists");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+        boolean success = userService.resetPassword(request.getToken(), request.getNewPassword());
+        if (!success) {
+            return ResponseEntity.badRequest().body("Invalid or expired token");
+        }
+        return ResponseEntity.ok("Password successfully reset");
     }
 }
