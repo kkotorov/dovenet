@@ -1,5 +1,6 @@
 package com.richmax.dovenet.service.impl;
 
+import com.richmax.dovenet.repository.data.User;
 import com.richmax.dovenet.service.EmailService;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -22,4 +23,19 @@ public class EmailServiceImpl implements EmailService {
         message.setText(body);
         mailSender.send(message);
     }
+
+    @Override
+    public void sendVerificationEmail(User user) {
+        String verifyLink = "http://localhost:5173/verify-email?token=" + user.getVerificationToken();
+        String subject = "Confirm your Dovenet account";
+        String body = "Hello " + user.getUsername() + ",\n\n"
+                + "Welcome to Dovenet! Please confirm your email by clicking the link below:\n\n"
+                + verifyLink + "\n\n"
+                + "This link will expire in 24 hours.\n\n"
+                + "Best regards,\n"
+                + "The Dovenet Team";
+
+        sendEmail(user.getEmail(), subject, body);
+    }
+
 }

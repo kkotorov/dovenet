@@ -28,4 +28,15 @@ public class User {
     private String resetToken;
 
     private LocalDateTime resetTokenExpiry;
+
+    // --- Fields for email verification ---
+    @Column(name = "email_verified")
+    private boolean emailVerified = false;
+
+    @Column(name = "verification_token")
+    private String verificationToken;
+
+    @Column(name = "verification_token_expiry")
+    private LocalDateTime verificationTokenExpiry;
+
 }

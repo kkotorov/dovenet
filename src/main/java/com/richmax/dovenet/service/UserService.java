@@ -15,6 +15,10 @@ public interface UserService {
      */
     User registerUser(String username, String email, String password);
 
+    void generateAndSendVerificationEmail(User user);
+
+    boolean verifyEmail(String token);
+
     User findByUsername(String username);
 
     User findById(Long id);
@@ -30,4 +34,6 @@ public interface UserService {
     void initiatePasswordReset(String email);
 
     boolean resetPassword(String token, String newPassword);
+
+     void deleteUser(String username);
 }

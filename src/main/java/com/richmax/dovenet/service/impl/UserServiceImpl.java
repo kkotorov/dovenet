@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -39,9 +40,39 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password)); // ✅ encrypt password
+        user.setPassword(passwordEncoder.encode(password));
 
-        return userRepository.save(user);
+        user.setEmailVerified(false);
+
+        this.generateAndSendVerificationEmail(user);
+
+        return user;
+    }
+
+    @Override
+    public void generateAndSendVerificationEmail(User user) {
+        // Generate email verification token
+        String token = UUID.randomUUID().toString();
+        user.setVerificationToken(token);
+        user.setVerificationTokenExpiry(LocalDateTime.now().plusHours(24));
+
+        userRepository.save(user);
+
+        emailService.sendVerificationEmail(user);
+    }
+
+    @Override
+    public boolean verifyEmail(String token) {
+        User user = userRepository.findByVerificationToken(token);
+        if (user == null || user.getVerificationTokenExpiry().isBefore(LocalDateTime.now())) {
+            return false;
+        }
+
+        user.setEmailVerified(true);
+        user.setVerificationToken(null);
+        user.setVerificationTokenExpiry(null);
+        userRepository.save(user);
+        return true;
     }
 
     @Override
@@ -136,4 +167,15 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         return true;
     }
+
+    @Override
+    public void deleteUser(String username) {
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isPresent()) {
+            userRepository.delete(userOpt.get());
+        } else {
+            throw new RuntimeException("User not found");
+        }
+    }
+
 }
