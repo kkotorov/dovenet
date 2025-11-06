@@ -110,9 +110,23 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Email already in use");
         }
 
+        // Update email
         user.setEmail(newEmail);
-        return userRepository.save(user);
+
+        // Reset verification state
+        user.setEmailVerified(false);
+        user.setVerificationToken(null);
+        user.setVerificationTokenExpiry(null);
+
+        // Save updated user
+        userRepository.save(user);
+
+        // Send new verification email
+        this.generateAndSendVerificationEmail(user);
+
+        return user;
     }
+
 
     @Override
     public User changePassword(String username, String oldPassword, String newPassword) {
