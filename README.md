@@ -133,14 +133,14 @@ curl -X POST http://localhost:8080/api/users \
 -H "Content-Type: application/json" \
 -d '{"username":"demo","email":"demo@example.com","password":"Demo123!"}'
 ```
-```
 # Authenticate and get JWT token
+```
 curl -X POST http://localhost:8080/api/auth/login \
 -H "Content-Type: application/json" \
 -d '{"username":"demo","password":"Demo123!"}'
 ```
-```
 # Get all pigeons (requires JWT token)
+```
 curl -X GET http://localhost:8080/api/pigeons \
 -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
