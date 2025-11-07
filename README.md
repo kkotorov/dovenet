@@ -124,7 +124,6 @@ Experience the full user interface for managing pigeons, registering users, and 
 ### Backend Demo
 Interact directly with the API endpoints to test functionality and see the backend in action:
 
-- **Postman Collection:** You can import the provided `DoveNet.postman_collection.json` to quickly test all endpoints.
 - Example `curl` requests:
 
 ```bash
