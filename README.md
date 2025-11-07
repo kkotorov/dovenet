@@ -14,6 +14,8 @@ This project is designed with maintainability and security in mind and serves as
 
 ---
 
+- **Live Demo:** [DoveNet UI](https://youtu.be/ezMFsSjKeSA)  
+
 ## Features
 
 ### User Management
@@ -114,7 +116,7 @@ You can explore **DoveNet** either through the frontend interface or by interact
 ### Frontend Demo
 Experience the full user interface for managing pigeons, registering users, and generating PDF pedigrees:
 
-- **Live Demo:** [DoveNet UI](https://dovenet-ui.example.com)  
+- **Live Demo:** [DoveNet UI](https://youtu.be/ezMFsSjKeSA)  
 - Features shown:
   - User registration and login (JWT authentication)
   - Adding, updating, and deleting pigeons
