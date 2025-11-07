@@ -1,39 +1,49 @@
 # DoveNet 🕊️
 
-**DoveNet** is a backend and future frontend application for pigeon breeders to manage their pigeons. Users can register, manage their pigeons, track competitions, update statuses, and generate PDF pedigree trees.
+![Java](https://img.shields.io/badge/Java-17+-blue)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-2.7-green)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14-blue)
+![Maven](https://img.shields.io/badge/Maven-3.9-red)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+![Build](https://img.shields.io/badge/build-passing-brightgreen) 
+![JWT](https://img.shields.io/badge/JWT-implemented-orange)
+
+**DoveNet** is a backend application (with frontend separately developed - https://github.com/kkotorov/dovenet-ui) for pigeon breeders to manage their pigeons. Users can register, verify accounts, manage pigeons, track competitions, reset passwords, and generate PDF pedigree trees.  
+
+This project is designed with maintainability and security in mind and serves as a showcase for backend development skills, API design, and Java/Spring Boot expertise.
 
 ---
 
 ## Features
 
-* **User Management**
+### User Management
+* Register new users with email verification
+* Secure password storage (hashed)
+* Password reset via token
+* Update email and password
+* JWT-based authentication for secure login
 
-  * Register new users
-  * Secure password storage (hashed)
-* **Pigeon Management**
+### Pigeon Management
+* Add, delete, update pigeons
+* Track pigeon details (age, color, status, gender, ring number)
+* View pigeon stats and history
+* View pigeon parents and ancestry
+* Generate PDF pedigree tree
 
-  * Add, delete, and update pigeons
-  * Track pigeon details (age, status, color, etc.)
-  * View stats and history
-* **Competition Tracking**
-
-  * Record pigeon finishes in competitions
-* **Pedigree Tree**
-
-  * Generate PDF of pigeon ancestry
-* **Filtering & Searching**
-
-  * Filter pigeons by status, age, or other fields
+### Filtering & Searching
+* Filter pigeons by name, color, gender, status, birthdate, or competition participation
+* Advanced search by partial or exact match
+* Sort pigeons by name, color, status, or birthdate
 
 ---
 
 ## Tech Stack
 
-* **Backend:** Java 17+, Spring Boot, Spring Data JPA
-* **Database:** PostgreSQL
-* **ORM:** Hibernate
-* **Frontend (future):** React.js
-* **PDF Generation:** TBD (iText or Apache PDFBox)
+* **Backend:** Java 17+, Spring Boot, Spring Data JPA  
+* **Database:** PostgreSQL  
+* **ORM:** Hibernate  
+* **Frontend https://github.com/kkotorov/dovenet-ui :** React.js  
+* **PDF Generation:** iText  
 
 ---
 
@@ -43,7 +53,7 @@
 
 * Java 17+
 * Maven
-* PostgreSQL database
+* PostgreSQL
 * IDE (IntelliJ, VSCode, Eclipse, etc.)
 
 ### Configuration
@@ -63,56 +73,78 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 server.port=8080
 ```
 
-### Run Backend
-
-```bash
+Run Backend
+```
 mvn spring-boot:run
 ```
+The backend API will run on ```http://localhost:8080/api```
 
-The backend API will run on `http://localhost:8080/api`.
+# API Endpoints
 
----
+## Users
 
-## API Endpoints
+| Method | Endpoint                          | Description                       |
+| ------ | --------------------------------- | --------------------------------- |
+| POST   | /api/users                        | Register a new user               |
+| GET    | /api/users                        | Get all users (admin only)        |
+| POST   | /api/users/verify                 | Verify email with token           |
+| POST   | /api/users/password/reset         | Initiate password reset           |
+| POST   | /api/users/password/reset/confirm | Confirm password reset with token |
+| PUT    | /api/users/email                  | Change user email                 |
+| PUT    | /api/users/password               | Change user password              |
+| DELETE | /api/users/{username}             | Delete user account               |
 
-### Users
+## Pigeons
 
-| Method | Endpoint     | Description           |
-| ------ | ------------ | --------------------- |
-| POST   | `/api/users` | Register new user     |
-| GET    | `/api/users` | Get all users (admin) |
+| Method | Endpoint                       | Description                            |
+| ------ | ------------------------------ | -------------------------------------- |
+| GET    | /api/pigeons                   | Get all pigeons for authenticated user |
+| GET    | /api/pigeons/{id}              | Get pigeon by ID                       |
+| POST   | /api/pigeons                   | Create a new pigeon                    |
+| PATCH  | /api/pigeons/{id}              | Update pigeon details                  |
+| DELETE | /api/pigeons/{id}              | Delete pigeon by ID                    |
+| GET    | /api/pigeons/{id}/parents      | Get parents of a pigeon                |
+| GET    | /api/pigeons/{id}/pedigree     | Get pigeon pedigree                    |
+| GET    | /api/pigeons/{id}/pedigree/pdf | Download PDF pedigree                  |
 
-### Pigeons
+## Demo
 
-| Method | Endpoint            | Description                    |
-| ------ | ------------------- | ------------------------------ |
-| GET    | `/api/pigeons`      | List all pigeons               |
-| POST   | `/api/pigeons`      | Add a new pigeon               |
-| DELETE | `/api/pigeons/{id}` | Delete a pigeon by ID          |
-| PUT    | `/api/pigeons/{id}` | Update pigeon details (future) |
+You can explore **DoveNet** either through the frontend interface or by interacting directly with the backend API.
 
----
+### Frontend Demo
+Experience the full user interface for managing pigeons, registering users, and generating PDF pedigrees:
 
-## Future Features
+- **Live Demo:** [DoveNet UI](https://dovenet-ui.example.com)  
+- Features shown:
+  - User registration and login (JWT authentication)
+  - Adding, updating, and deleting pigeons
+  - Viewing pigeon ancestry and stats
+  - Generating PDF pedigree trees
 
-* User authentication & JWT
-* Frontend React UI
-* PDF pedigree generation
-* Competition tracking module
-* Advanced filtering and sorting
+### Backend Demo
+Interact directly with the API endpoints to test functionality and see the backend in action:
 
----
+- **Postman Collection:** You can import the provided `DoveNet.postman_collection.json` to quickly test all endpoints.
+- Example `curl` requests:
 
-## Contributing
+```bash
+# Register a new user
+curl -X POST http://localhost:8080/api/users \
+-H "Content-Type: application/json" \
+-d '{"username":"demo","email":"demo@example.com","password":"Demo123!"}'
+```
+```
+# Authenticate and get JWT token
+curl -X POST http://localhost:8080/api/auth/login \
+-H "Content-Type: application/json" \
+-d '{"username":"demo","password":"Demo123!"}'
+```
+```
+# Get all pigeons (requires JWT token)
+curl -X GET http://localhost:8080/api/pigeons \
+-H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
 
-1. Fork the project
-2. Create a new branch: `git checkout -b feature/your-feature`
-3. Commit your changes: `git commit -am 'Add new feature'`
-4. Push to the branch: `git push origin feature/your-feature`
-5. Open a pull request
+## Author
 
----
-
-## License
-
-This project is open-source. Feel free to use, modify, and share.
+**Krasen Kotorov** – Java Backend Developer
