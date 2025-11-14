@@ -14,7 +14,8 @@ This project is designed with maintainability and security in mind and serves as
 
 ---
 
-- **Live Demo:** [DoveNet UI](https://youtu.be/ezMFsSjKeSA)  
+- **Live WebClient:** [DoveNet UI](https://dovenet.eu)  
+- **Live Video:** [DoveNet UI](https://youtu.be/ezMFsSjKeSA)  
 
 ## Features
 
