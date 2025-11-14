@@ -18,15 +18,17 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendEmail(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("verify@dovenet.eu");
         message.setTo(to);
         message.setSubject(subject);
         message.setText(body);
         mailSender.send(message);
     }
 
+
     @Override
     public void sendVerificationEmail(User user) {
-        String verifyLink = "http://localhost:5173/verify-email?token=" + user.getVerificationToken();
+        String verifyLink = "https://www.dovenet.eu/verify-email?token=" + user.getVerificationToken();
         String subject = "Confirm your Dovenet account";
         String body = "Hello " + user.getUsername() + ",\n\n"
                 + "Welcome to Dovenet! Please confirm your email by clicking the link below:\n\n"
@@ -37,5 +39,4 @@ public class EmailServiceImpl implements EmailService {
 
         sendEmail(user.getEmail(), subject, body);
     }
-
 }

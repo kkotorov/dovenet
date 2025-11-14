@@ -45,7 +45,12 @@ public class WebSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // frontend URL
+        configuration.setAllowedOrigins(List.of(
+                "https://dovenet.eu",
+                "https://www.dovenet.eu",
+                "http://localhost:5173",                 // dev
+                "https://dovenet-ui.vercel.app"         // live frontend
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true); // allow cookies/auth headers

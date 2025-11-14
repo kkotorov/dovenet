@@ -152,7 +152,7 @@ public class UserServiceImpl implements UserService {
         user.setResetTokenExpiry(LocalDateTime.now().plusHours(1)); // token valid for 1 hour
         userRepository.save(user);
 
-        String resetLink = "http://localhost:5173/reset-password?token=" + token;
+        String resetLink = "https://www.dovenet.eu/reset-password?token=" + token;
 
         // Email contents
         String subject = "Password Reset Request";
