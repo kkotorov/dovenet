@@ -21,6 +21,7 @@ import com.lowagie.text.*;
 import com.lowagie.text.pdf.*;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
+import java.util.stream.Collectors;
 
 @Service
 public class PigeonServiceImpl implements PigeonService {
@@ -328,9 +329,31 @@ public class PigeonServiceImpl implements PigeonService {
                 .toList();
     }
 
+    @Override
+    public List<PigeonDTO> getPigeonChildren(Long id, String username) {
+        // Validate user exists
+        User owner = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Username does not exist"));
+
+        // Find pigeon by ID
+        Pigeon pigeon = pigeonRepository.findById(id)
+                .orElseThrow(() -> new PigeonNotFoundException("Pigeon does not exist"));
+
+        // Find all pigeons where this pigeon is the father or mother
+        List<Pigeon> children = pigeonRepository.findByFatherRingNumberOrMotherRingNumber(
+                pigeon.getRingNumber(), pigeon.getRingNumber()
+        );
+
+        List<Pigeon> ownedChildren = children.stream()
+                .filter(c -> c.getOwner().getId().equals(owner.getId()))
+                .toList();
+
+        return ownedChildren.stream()
+                .map(this::convertToDto)
+                .toList();
+    }
 
     //helpers
-
     public PigeonDTO convertToDto(Pigeon pigeon) {
         return pigeonMapper.toDto(pigeon);
     }
@@ -378,7 +401,6 @@ public class PigeonServiceImpl implements PigeonService {
             addText(canvas, x, y - offset, "Color: " + pigeon.getColor(), 8, false);
         }
     }
-
 
     private Pigeon autoCreateIfMissing(String ringNumber, User owner) {
         if (ringNumber == null || ringNumber.isBlank()) return null;

@@ -74,4 +74,11 @@ public class PigeonController {
         String username = authentication.getName();
         return pigeonService.searchRings(q, username);
     }
+
+    @GetMapping("/{id}/children")
+    public List<PigeonDTO> getPigeonChildren(@PathVariable Long id, Authentication authentication) {
+        String username = authentication.getName();
+        return pigeonService.getPigeonChildren(id, username);
+    }
+
 }
