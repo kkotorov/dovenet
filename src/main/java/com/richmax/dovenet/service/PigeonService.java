@@ -26,4 +26,6 @@ public interface PigeonService {
     PigeonPedigreeDTO getPedigree(Long pigeonId, String username);
 
     byte[] generatePedigreePdf(Long id, String username);
+
+    public List<String> searchRings(String q, String username);
 }

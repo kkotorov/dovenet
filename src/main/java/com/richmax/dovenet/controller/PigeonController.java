@@ -69,4 +69,9 @@ public class PigeonController {
                 .body(pdfBytes);
     }
 
+    @GetMapping("/search-rings")
+    public List<String> searchRings(@RequestParam String q, Authentication authentication) {
+        String username = authentication.getName();
+        return pigeonService.searchRings(q, username);
+    }
 }

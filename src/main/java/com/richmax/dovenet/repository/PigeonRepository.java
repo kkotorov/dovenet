@@ -13,6 +13,7 @@ public interface PigeonRepository extends JpaRepository<Pigeon, Long> {
     // --- ID / Ring Number ---
     Optional<Pigeon> findByRingNumber(String ringNumber);
     boolean existsByRingNumber(String ringNumber);
+    List<Pigeon> findByOwnerUsernameAndRingNumberStartingWith(String username, String ringPrefix);
 
     // --- Name ---
     List<Pigeon> findByNameIgnoreCase(String name);

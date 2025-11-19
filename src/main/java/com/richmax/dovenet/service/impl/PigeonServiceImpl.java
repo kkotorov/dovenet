@@ -72,8 +72,8 @@ public class PigeonServiceImpl implements PigeonService {
         pigeon.setOwner(owner);
 
         // Auto-create parents
-        autoCreateIfMissing(pigeon.getFatherRingNumber(), owner);
-        autoCreateIfMissing(pigeon.getMotherRingNumber(), owner);
+        Pigeon father = autoCreateIfMissing(pigeon.getFatherRingNumber(), owner);
+        Pigeon mother = autoCreateIfMissing(pigeon.getMotherRingNumber(), owner);
 
         Pigeon saved = pigeonRepository.save(pigeon);
 
@@ -175,14 +175,6 @@ public class PigeonServiceImpl implements PigeonService {
         }
 
         return parents;
-    }
-
-    public PigeonDTO convertToDto(Pigeon pigeon) {
-        return pigeonMapper.toDto(pigeon);
-    }
-
-    public Pigeon convertToEntity(PigeonDTO pigeonDTO) {
-        return pigeonMapper.toEntity(pigeonDTO);
     }
 
     @Override
@@ -324,6 +316,29 @@ public class PigeonServiceImpl implements PigeonService {
         }
     }
 
+    @Override
+    public List<String> searchRings(String q, String username) {
+        User owner = userRepository.findByUsername(username)
+                .orElseThrow();
+
+        return pigeonRepository
+                .findByOwnerUsernameAndRingNumberStartingWith(username, q)
+                .stream()
+                .map(Pigeon::getRingNumber)
+                .toList();
+    }
+
+
+    //helpers
+
+    public PigeonDTO convertToDto(Pigeon pigeon) {
+        return pigeonMapper.toDto(pigeon);
+    }
+
+    public Pigeon convertToEntity(PigeonDTO pigeonDTO) {
+        return pigeonMapper.toEntity(pigeonDTO);
+    }
+
     private void addText(PdfContentByte canvas, float x, float y, String text, int fontSize, boolean bold) {
         if (text == null) return;
         try {
@@ -377,6 +392,4 @@ public class PigeonServiceImpl implements PigeonService {
                     return pigeonRepository.save(p);
                 });
     }
-
-
 }
