@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface PigeonRepository extends JpaRepository<Pigeon, Long> {
     // --- ID / Ring Number ---
     Optional<Pigeon> findByRingNumber(String ringNumber);
+    boolean existsByRingNumber(String ringNumber);
 
     // --- Name ---
     List<Pigeon> findByNameIgnoreCase(String name);

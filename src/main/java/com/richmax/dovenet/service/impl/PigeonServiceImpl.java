@@ -70,6 +70,11 @@ public class PigeonServiceImpl implements PigeonService {
 
         Pigeon pigeon = convertToEntity(pigeonDTO);
         pigeon.setOwner(owner);
+
+        // Auto-create parents
+        autoCreateIfMissing(pigeon.getFatherRingNumber(), owner);
+        autoCreateIfMissing(pigeon.getMotherRingNumber(), owner);
+
         Pigeon saved = pigeonRepository.save(pigeon);
 
         return convertToDto(saved);
@@ -88,13 +93,28 @@ public class PigeonServiceImpl implements PigeonService {
         }
 
         // Update allowed fields
+        if (pigeonDTO.getRingNumber() != null && !pigeonDTO.getRingNumber().equals(pigeon.getRingNumber())) {
+            // Check uniqueness
+            if (pigeonRepository.existsByRingNumber(pigeonDTO.getRingNumber())) {
+                throw new RuntimeException("Ring number already in use");
+            }
+            pigeon.setRingNumber(pigeonDTO.getRingNumber());
+        }
+
         if (pigeonDTO.getName() != null) pigeon.setName(pigeonDTO.getName());
         if (pigeonDTO.getColor() != null) pigeon.setColor(pigeonDTO.getColor());
         if (pigeonDTO.getGender() != null) pigeon.setGender(pigeonDTO.getGender());
         if (pigeonDTO.getStatus() != null) pigeon.setStatus(pigeonDTO.getStatus());
         if (pigeonDTO.getBirthDate() != null) pigeon.setBirthDate(pigeonDTO.getBirthDate());
-        if (pigeonDTO.getFatherRingNumber() != null) pigeon.setFatherRingNumber(pigeonDTO.getFatherRingNumber());
-        if (pigeonDTO.getMotherRingNumber() != null) pigeon.setMotherRingNumber(pigeonDTO.getMotherRingNumber());
+
+        if (pigeonDTO.getFatherRingNumber() != null) {
+            autoCreateIfMissing(pigeonDTO.getFatherRingNumber(), owner);
+            pigeon.setFatherRingNumber(pigeonDTO.getFatherRingNumber());
+        }
+        if (pigeonDTO.getMotherRingNumber() != null) {
+            autoCreateIfMissing(pigeonDTO.getMotherRingNumber(), owner);
+            pigeon.setMotherRingNumber(pigeonDTO.getMotherRingNumber());
+        }
 
         // Allow transferring to a new owner
         if (pigeonDTO.getOwner() != null) {
@@ -321,15 +341,42 @@ public class PigeonServiceImpl implements PigeonService {
     }
 
     private void fillPigeonBox(PigeonDTO pigeon, PdfContentByte canvas, int x, int y) {
-        String textName = "Name: " + pigeon.getName();
-        String textRing = "Ring: " + pigeon.getRingNumber();
-        String textColor = "Color: " + pigeon.getColor();
-        String textGender = "Gender: " + pigeon.getGender();
 
-        addText(canvas, x, y, textRing,8, true);
-        addText(canvas, x, y-20, textName,8,true);
-        addText(canvas, x, y-40, textGender,8, false);
-        addText(canvas, x, y-60, textColor,8,false);
+        int offset = 0;
+
+        if (pigeon.getRingNumber() != null) {
+            addText(canvas, x, y - offset, "Ring: " + pigeon.getRingNumber(), 8, true);
+            offset += 20;
+        }
+
+        if (pigeon.getName() != null) {
+            addText(canvas, x, y - offset, "Name: " + pigeon.getName(), 8, true);
+            offset += 20;
+        }
+
+        if (pigeon.getGender() != null) {
+            addText(canvas, x, y - offset, "Gender: " + pigeon.getGender(), 8, false);
+            offset += 20;
+        }
+
+        if (pigeon.getColor() != null) {
+            addText(canvas, x, y - offset, "Color: " + pigeon.getColor(), 8, false);
+        }
     }
+
+
+    private Pigeon autoCreateIfMissing(String ringNumber, User owner) {
+        if (ringNumber == null || ringNumber.isBlank()) return null;
+
+        return pigeonRepository.findByRingNumber(ringNumber)
+                .orElseGet(() -> {
+                    Pigeon p = new Pigeon();
+                    p.setRingNumber(ringNumber);
+                    p.setOwner(owner);
+                    p.setStatus("unknown");
+                    return pigeonRepository.save(p);
+                });
+    }
+
 
 }
