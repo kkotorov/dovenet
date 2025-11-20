@@ -81,4 +81,13 @@ public class PigeonController {
         return pigeonService.getPigeonChildren(id, username);
     }
 
+    @GetMapping("/loft/{loftId}")
+    public List<PigeonDTO> getPigeonsInLoft(
+            @PathVariable Long loftId,
+            Authentication authentication
+    ) {
+        return pigeonService.getPigeonsInLoft(loftId, authentication.getName());
+    }
+
+
 }

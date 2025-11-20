@@ -1,10 +1,13 @@
 package com.richmax.dovenet.service.impl;
 
+import com.richmax.dovenet.exception.LoftNotFoundException;
 import com.richmax.dovenet.exception.PigeonNotFoundException;
 import com.richmax.dovenet.exception.UnauthorizedActionException;
 import com.richmax.dovenet.exception.UserNotFoundException;
 import com.richmax.dovenet.mapper.PigeonMapper;
+import com.richmax.dovenet.repository.LoftRepository;
 import com.richmax.dovenet.repository.UserRepository;
+import com.richmax.dovenet.repository.data.Loft;
 import com.richmax.dovenet.repository.data.Pigeon;
 import com.richmax.dovenet.repository.PigeonRepository;
 import com.richmax.dovenet.repository.data.User;
@@ -21,18 +24,19 @@ import com.lowagie.text.*;
 import com.lowagie.text.pdf.*;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
-import java.util.stream.Collectors;
 
 @Service
 public class PigeonServiceImpl implements PigeonService {
     private final PigeonRepository pigeonRepository;
     private final PigeonMapper pigeonMapper;
     private final UserRepository userRepository;
+    private final LoftRepository loftRepository;
 
-    public PigeonServiceImpl(PigeonRepository pigeonRepository, PigeonMapper pigeonMapper, UserRepository userRepository) {
+    public PigeonServiceImpl(PigeonRepository pigeonRepository, PigeonMapper pigeonMapper, UserRepository userRepository, LoftRepository loftRepository) {
         this.pigeonRepository = pigeonRepository;
         this.pigeonMapper = pigeonMapper;
         this.userRepository = userRepository;
+        this.loftRepository = loftRepository;
     }
 
     @Override
@@ -72,6 +76,12 @@ public class PigeonServiceImpl implements PigeonService {
         Pigeon pigeon = convertToEntity(pigeonDTO);
         pigeon.setOwner(owner);
 
+        if (pigeonDTO.getLoftId() != null) {
+            Loft loft = loftRepository.findById(pigeonDTO.getLoftId())
+                    .orElseThrow(() -> new LoftNotFoundException("Loft not found"));
+            pigeon.setLoft(loft);
+        }
+
         // Auto-create parents
         Pigeon father = autoCreateIfMissing(pigeon.getFatherRingNumber(), owner);
         Pigeon mother = autoCreateIfMissing(pigeon.getMotherRingNumber(), owner);
@@ -101,6 +111,13 @@ public class PigeonServiceImpl implements PigeonService {
             }
             pigeon.setRingNumber(pigeonDTO.getRingNumber());
         }
+
+        if (pigeonDTO.getLoftId() != null) {
+            Loft loft = loftRepository.findById(pigeonDTO.getLoftId())
+                    .orElseThrow(() -> new LoftNotFoundException("Loft not found"));
+            pigeon.setLoft(loft);
+        }
+
 
         if (pigeonDTO.getName() != null) pigeon.setName(pigeonDTO.getName());
         if (pigeonDTO.getColor() != null) pigeon.setColor(pigeonDTO.getColor());
@@ -352,6 +369,24 @@ public class PigeonServiceImpl implements PigeonService {
                 .map(this::convertToDto)
                 .toList();
     }
+
+    @Override
+    public List<PigeonDTO> getPigeonsInLoft(Long loftId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        Loft loft = loftRepository.findById(loftId)
+                .orElseThrow(() -> new LoftNotFoundException("Loft not found"));
+
+        if (!loft.getOwner().getId().equals(user.getId())) {
+            throw new UnauthorizedActionException("You cannot view pigeons from another user's loft");
+        }
+
+        List<Pigeon> pigeons = pigeonRepository.findByLoftIdAndOwnerId(loftId, user.getId());
+
+        return pigeons.stream().map(this::convertToDto).toList();
+    }
+
 
     //helpers
     public PigeonDTO convertToDto(Pigeon pigeon) {

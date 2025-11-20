@@ -23,5 +23,9 @@ public class PigeonDTO {
     private String motherRingNumber;
 
     private UserDTO owner;
+
     private List<Competition> competitions = new ArrayList<>();
+
+    private LoftDTO loft;
+    private Long loftId;
 }

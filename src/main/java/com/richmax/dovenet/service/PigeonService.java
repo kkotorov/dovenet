@@ -31,4 +31,5 @@ public interface PigeonService {
 
     List<PigeonDTO> getPigeonChildren(Long id, String username);
 
+    List<PigeonDTO> getPigeonsInLoft(Long loftId, String username);
 }

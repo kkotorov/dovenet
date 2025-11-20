@@ -16,7 +16,6 @@ public interface PigeonRepository extends JpaRepository<Pigeon, Long> {
     List<Pigeon> findByOwnerUsernameAndRingNumberStartingWith(String username, String ringPrefix);
     List<Pigeon> findByFatherRingNumberOrMotherRingNumber(String fatherRing, String motherRing);
 
-
     // --- Name ---
     List<Pigeon> findByNameIgnoreCase(String name);
     List<Pigeon> findByNameContainingIgnoreCase(String namePart);
@@ -57,4 +56,8 @@ public interface PigeonRepository extends JpaRepository<Pigeon, Long> {
     List<Pigeon> findAllByOrderByNameAsc();
     List<Pigeon> findAllByStatusOrderByBirthDateAsc(String status);
     List<Pigeon> findAllByColorOrderByNameAsc(String color);
+
+    // by loft
+    List<Pigeon> findByLoftIdAndOwnerId(Long loftId, Long ownerId);
+
 }

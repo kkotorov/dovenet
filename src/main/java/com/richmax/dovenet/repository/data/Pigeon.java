@@ -35,4 +35,9 @@ public class Pigeon {
 
     @OneToMany(mappedBy = "pigeon", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Competition> competitions = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "loft_id")
+    private Loft loft;
+
 }
