@@ -11,9 +11,16 @@ public class Loft {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;        // e.g. Racing Loft
-    private String type;        // Racing, Breeding, Young Birds
-    private String description; // optional
+    private String name;
+    private String type;
+    private String description;
+
+    private String address;
+    private Integer capacity;
+
+    private Double loftSize;       //sq meters
+    private Double gpsLatitude;
+    private Double gpsLongitude;
 
     @ManyToOne
     @JoinColumn(name = "owner_id")

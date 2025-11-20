@@ -59,5 +59,6 @@ public interface PigeonRepository extends JpaRepository<Pigeon, Long> {
 
     // by loft
     List<Pigeon> findByLoftIdAndOwnerId(Long loftId, Long ownerId);
+    long countByLoftId(Long loftId);
 
 }
