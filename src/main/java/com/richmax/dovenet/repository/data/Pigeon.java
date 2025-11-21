@@ -34,7 +34,7 @@ public class Pigeon {
     private User owner;
 
     @OneToMany(mappedBy = "pigeon", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Competition> competitions = new ArrayList<>();
+    private List<CompetitionEntry> competitionEntries = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "loft_id")

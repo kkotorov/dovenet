@@ -4,6 +4,7 @@ import com.richmax.dovenet.exception.LoftNotFoundException;
 import com.richmax.dovenet.exception.PigeonNotFoundException;
 import com.richmax.dovenet.exception.UnauthorizedActionException;
 import com.richmax.dovenet.exception.UserNotFoundException;
+import com.richmax.dovenet.mapper.CompetitionEntryMapper;
 import com.richmax.dovenet.mapper.PigeonMapper;
 import com.richmax.dovenet.repository.LoftRepository;
 import com.richmax.dovenet.repository.UserRepository;
@@ -12,6 +13,7 @@ import com.richmax.dovenet.repository.data.Pigeon;
 import com.richmax.dovenet.repository.PigeonRepository;
 import com.richmax.dovenet.repository.data.User;
 import com.richmax.dovenet.service.PigeonService;
+import com.richmax.dovenet.service.data.CompetitionEntryDTO;
 import com.richmax.dovenet.service.data.PigeonDTO;
 import com.richmax.dovenet.service.data.PigeonPedigreeDTO;
 import jakarta.transaction.Transactional;
@@ -29,12 +31,14 @@ import java.io.ByteArrayOutputStream;
 public class PigeonServiceImpl implements PigeonService {
     private final PigeonRepository pigeonRepository;
     private final PigeonMapper pigeonMapper;
+    private final CompetitionEntryMapper entryMapper;
     private final UserRepository userRepository;
     private final LoftRepository loftRepository;
 
-    public PigeonServiceImpl(PigeonRepository pigeonRepository, PigeonMapper pigeonMapper, UserRepository userRepository, LoftRepository loftRepository) {
+    public PigeonServiceImpl(PigeonRepository pigeonRepository, PigeonMapper pigeonMapper, CompetitionEntryMapper entryMapper, UserRepository userRepository, LoftRepository loftRepository) {
         this.pigeonRepository = pigeonRepository;
         this.pigeonMapper = pigeonMapper;
+        this.entryMapper = entryMapper;
         this.userRepository = userRepository;
         this.loftRepository = loftRepository;
     }
@@ -386,6 +390,24 @@ public class PigeonServiceImpl implements PigeonService {
 
         return pigeons.stream().map(this::convertToDto).toList();
     }
+
+    @Override
+    public List<CompetitionEntryDTO> getCompetitionsForPigeon(Long pigeonId, String username) {
+        User owner = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        Pigeon pigeon = pigeonRepository.findById(pigeonId)
+                .orElseThrow(() -> new PigeonNotFoundException("Pigeon not found"));
+
+        if (!pigeon.getOwner().getId().equals(owner.getId())) {
+            throw new UnauthorizedActionException("You cannot view pigeons you don't own");
+        }
+
+        return pigeon.getCompetitionEntries().stream()
+                .map(entry -> entryMapper.toDto(entry))
+                .toList();
+    }
+
 
 
     //helpers

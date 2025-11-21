@@ -13,13 +13,23 @@ public class Competition {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;       // name of the competition
-    private LocalDate date;    // when it happened
-    private int place;         // the pigeon’s ranking
-    private double score;      // optional, points earned
-    private String notes;      // extra info, e.g., "good weather, fast flight"
+    private String name;            // Competition name
+    private LocalDate date;         // Date of the competition
+
+    private Double startLatitude;   // Starting location coordinates
+    private Double startLongitude;
+
+    private Double distanceKm;      // Planned distance (optional, km)
+    private String notes;           // Optional notes about the competition
+
+    private Double temperatureC;
+    private Double windSpeedKmH;
+    private String windDirection;
+    private Boolean rain;
+    private String conditionsNotes;
+
 
     @ManyToOne
-    @JoinColumn(name = "pigeon_id")
-    private Pigeon pigeon;     // the pigeon this competition record belongs to
+    @JoinColumn(name = "owner_id")
+    private User owner;             // User who owns this competition
 }

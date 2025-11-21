@@ -1,6 +1,7 @@
 package com.richmax.dovenet.controller;
 
 import com.richmax.dovenet.service.PigeonService;
+import com.richmax.dovenet.service.data.CompetitionEntryDTO;
 import com.richmax.dovenet.service.data.PigeonDTO;
 import com.richmax.dovenet.service.data.PigeonPedigreeDTO;
 import org.springframework.http.HttpHeaders;
@@ -88,6 +89,12 @@ public class PigeonController {
     ) {
         return pigeonService.getPigeonsInLoft(loftId, authentication.getName());
     }
+
+    @GetMapping("/{id}/competitions")
+    public List<CompetitionEntryDTO> getCompetitionsForPigeon(@PathVariable Long id, Authentication authentication) {
+        return pigeonService.getCompetitionsForPigeon(id, authentication.getName());
+    }
+
 
 
 }

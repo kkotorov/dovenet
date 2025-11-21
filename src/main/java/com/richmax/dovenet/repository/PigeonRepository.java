@@ -48,10 +48,6 @@ public interface PigeonRepository extends JpaRepository<Pigeon, Long> {
     List<Pigeon> findByOwner(User owner);
     List<Pigeon> findByOwnerId(Long ownerId);
 
-    // --- Nested / association queries ---
-    List<Pigeon> findByCompetitions_NameIgnoreCase(String competitionName);
-    List<Pigeon> findByCompetitions_Date(LocalDate competitionDate);
-
     // --- Sorting
     List<Pigeon> findAllByOrderByNameAsc();
     List<Pigeon> findAllByStatusOrderByBirthDateAsc(String status);

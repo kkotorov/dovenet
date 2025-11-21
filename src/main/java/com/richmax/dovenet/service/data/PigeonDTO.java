@@ -24,7 +24,7 @@ public class PigeonDTO {
 
     private UserDTO owner;
 
-    private List<Competition> competitions = new ArrayList<>();
+    private List<CompetitionEntryDTO> competitionEntries = new ArrayList<>();
 
     private LoftDTO loft;
     private Long loftId;

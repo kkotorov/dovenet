@@ -1,6 +1,7 @@
 package com.richmax.dovenet.service;
 
 import com.richmax.dovenet.repository.data.Pigeon;
+import com.richmax.dovenet.service.data.CompetitionEntryDTO;
 import com.richmax.dovenet.service.data.PigeonDTO;
 import com.richmax.dovenet.service.data.PigeonPedigreeDTO;
 
@@ -32,4 +33,6 @@ public interface PigeonService {
     List<PigeonDTO> getPigeonChildren(Long id, String username);
 
     List<PigeonDTO> getPigeonsInLoft(Long loftId, String username);
+
+    List<CompetitionEntryDTO> getCompetitionsForPigeon(Long pigeonId, String username);
 }
