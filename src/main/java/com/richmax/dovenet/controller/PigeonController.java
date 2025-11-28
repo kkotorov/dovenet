@@ -59,7 +59,6 @@ public class PigeonController {
         return pigeonService.getPedigree(id, authentication.getName());
     }
 
-
     @GetMapping("/{id}/pedigree/pdf")
     public ResponseEntity<byte[]> downloadPedigreePdf(@PathVariable Long id, Authentication authentication) {
         byte[] pdfBytes = pigeonService.generatePedigreePdf(id, authentication.getName());
@@ -94,7 +93,4 @@ public class PigeonController {
     public List<CompetitionEntryDTO> getCompetitionsForPigeon(@PathVariable Long id, Authentication authentication) {
         return pigeonService.getCompetitionsForPigeon(id, authentication.getName());
     }
-
-
-
 }

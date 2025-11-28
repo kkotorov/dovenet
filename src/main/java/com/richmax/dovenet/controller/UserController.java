@@ -6,8 +6,10 @@ import com.richmax.dovenet.repository.data.User;
 import com.richmax.dovenet.security.JwtUtil;
 import com.richmax.dovenet.service.UserService;
 import com.richmax.dovenet.service.data.UserDTO;
+import com.richmax.dovenet.types.SubscriptionType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -121,5 +123,24 @@ public class UserController {
             return ResponseEntity.badRequest().body("Invalid or expired token");
         }
         return ResponseEntity.ok("Password successfully reset");
+    }
+
+    @PatchMapping("/me/subscription")
+    public UserDTO updateSubscription(
+            @RequestParam SubscriptionType type,
+            Authentication authentication
+    ) {
+        String username = authentication.getName();
+        return userService.updateSubscription(username, type);
+    }
+
+
+    @PatchMapping("/me/update-settings")
+    public UserDTO updateUserSettings(
+            @RequestBody UserDTO updates,
+            Authentication authentication
+    ) {
+        String username = authentication.getName();
+        return userService.updateUserSettings(username, updates);
     }
 }

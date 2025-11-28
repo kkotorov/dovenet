@@ -8,8 +8,11 @@ import com.richmax.dovenet.repository.UserRepository;
 import com.richmax.dovenet.service.EmailService;
 import com.richmax.dovenet.service.UserService;
 import com.richmax.dovenet.service.data.UserDTO;
+import com.richmax.dovenet.types.SubscriptionType;
+import com.richmax.dovenet.types.UserRole;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -41,6 +44,10 @@ public class UserServiceImpl implements UserService {
         user.setUsername(username);
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
+
+        user.setSubscription(SubscriptionType.FREE);
+        user.setRole(UserRole.USER);
+        user.setLanguage("en");
 
         user.setEmailVerified(false);
 
@@ -192,4 +199,27 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public UserDTO updateSubscription(String username, SubscriptionType type) {
+        User user = findByUsername(username);
+        user.setSubscription(type);
+        User updatedUser = userRepository.save(user);
+        return convertToDto(updatedUser);
+    }
+
+    @Override
+    @Transactional
+    public UserDTO updateUserSettings(String username, UserDTO updates) {
+        User user = findByUsername(username);
+
+        // Update allowed fields only if present
+        if (updates.getFirstName() != null) user.setFirstName(updates.getFirstName());
+        if (updates.getLastName() != null) user.setLastName(updates.getLastName());
+        if (updates.getPhoneNumber() != null) user.setPhoneNumber(updates.getPhoneNumber());
+        if (updates.getAddress() != null) user.setAddress(updates.getAddress());
+        if (updates.getLanguage() != null) user.setLanguage(updates.getLanguage());
+
+        // Save and return DTO
+        return convertToDto(userRepository.save(user));
+    }
 }

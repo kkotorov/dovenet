@@ -2,6 +2,8 @@ package com.richmax.dovenet.service;
 
 import com.richmax.dovenet.repository.data.User;
 import com.richmax.dovenet.service.data.UserDTO;
+import com.richmax.dovenet.types.SubscriptionType;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface UserService {
 
@@ -35,5 +37,11 @@ public interface UserService {
 
     boolean resetPassword(String token, String newPassword);
 
-     void deleteUser(String username);
+    void deleteUser(String username);
+
+    UserDTO updateSubscription(String username, SubscriptionType type);
+
+    @Transactional
+    UserDTO updateUserSettings(String username, UserDTO updates);
+
 }

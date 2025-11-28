@@ -1,6 +1,5 @@
 package com.richmax.dovenet.service.data;
 
-import com.richmax.dovenet.repository.data.Competition;
 import lombok.Data;
 
 import java.time.LocalDate;

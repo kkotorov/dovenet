@@ -408,8 +408,6 @@ public class PigeonServiceImpl implements PigeonService {
                 .toList();
     }
 
-
-
     //helpers
     public PigeonDTO convertToDto(Pigeon pigeon) {
         return pigeonMapper.toDto(pigeon);
