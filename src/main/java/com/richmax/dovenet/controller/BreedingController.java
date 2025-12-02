@@ -104,7 +104,6 @@ public class BreedingController {
 
 
     // --- OFFSPRING ---
-
     @PostMapping("/pairs/{pairId}/offspring/{pigeonId}")
     public BreedingPairDTO addOffspring(
             @PathVariable Long pairId,
@@ -112,5 +111,14 @@ public class BreedingController {
             Authentication authentication
     ) {
         return breedingService.addOffspring(pairId, pigeonId, authentication.getName());
+    }
+
+    @DeleteMapping("/pairs/{pairId}/offspring/{pigeonId}")
+    public BreedingPairDTO removeOffspring(
+            @PathVariable Long pairId,
+            @PathVariable Long pigeonId,
+            Authentication authentication
+    ) {
+        return breedingService.removeOffspring(pairId, pigeonId, authentication.getName());
     }
 }

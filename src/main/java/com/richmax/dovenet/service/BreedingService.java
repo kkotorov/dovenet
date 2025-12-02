@@ -31,4 +31,6 @@ public interface BreedingService {
 
     // --- OFFSPRING ---
     BreedingPairDTO addOffspring(Long pairId, Long pigeonId, String username);
+
+    BreedingPairDTO removeOffspring(Long pairId, Long pigeonId, String username);
 }

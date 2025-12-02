@@ -212,4 +212,19 @@ public class BreedingServiceImpl implements BreedingService {
 
         return pigeon;
     }
+
+    @Override
+    @Transactional
+    public BreedingPairDTO removeOffspring(Long pairId, Long pigeonId, String username) {
+        BreedingPair pair = pairRepository.findById(pairId)
+                .orElseThrow(() -> new BreedingPairNotFoundException("Pair not found"));
+
+        ensureOwner(pair.getSeason().getOwner().getUsername(), username);
+
+        Pigeon baby = getOwnedPigeon(pigeonId, username);
+
+        pair.getOffspring().remove(baby);
+
+        return breedingPairMapper.toDto(pair);
+    }
 }
