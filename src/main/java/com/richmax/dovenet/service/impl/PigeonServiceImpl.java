@@ -87,8 +87,8 @@ public class PigeonServiceImpl implements PigeonService {
         }
 
         // Auto-create parents
-        Pigeon father = autoCreateIfMissing(pigeon.getFatherRingNumber(), owner);
-        Pigeon mother = autoCreateIfMissing(pigeon.getMotherRingNumber(), owner);
+        Pigeon father = autoCreateIfMissing(pigeon.getFatherRingNumber(), "male", owner);
+        Pigeon mother = autoCreateIfMissing(pigeon.getMotherRingNumber(), "female",owner);
 
         Pigeon saved = pigeonRepository.save(pigeon);
 
@@ -130,11 +130,11 @@ public class PigeonServiceImpl implements PigeonService {
         if (pigeonDTO.getBirthDate() != null) pigeon.setBirthDate(pigeonDTO.getBirthDate());
 
         if (pigeonDTO.getFatherRingNumber() != null) {
-            autoCreateIfMissing(pigeonDTO.getFatherRingNumber(), owner);
+            autoCreateIfMissing(pigeonDTO.getFatherRingNumber(),"male", owner);
             pigeon.setFatherRingNumber(pigeonDTO.getFatherRingNumber());
         }
         if (pigeonDTO.getMotherRingNumber() != null) {
-            autoCreateIfMissing(pigeonDTO.getMotherRingNumber(), owner);
+            autoCreateIfMissing(pigeonDTO.getMotherRingNumber(),"female", owner);
             pigeon.setMotherRingNumber(pigeonDTO.getMotherRingNumber());
         }
 
@@ -457,7 +457,7 @@ public class PigeonServiceImpl implements PigeonService {
         }
     }
 
-    private Pigeon autoCreateIfMissing(String ringNumber, User owner) {
+    private Pigeon autoCreateIfMissing(String ringNumber, String gender, User owner) {
         if (ringNumber == null || ringNumber.isBlank()) return null;
 
         return pigeonRepository.findByRingNumber(ringNumber)
@@ -466,6 +466,7 @@ public class PigeonServiceImpl implements PigeonService {
                     p.setRingNumber(ringNumber);
                     p.setOwner(owner);
                     p.setStatus("unknown");
+                    p.setGender(gender);
                     return pigeonRepository.save(p);
                 });
     }

@@ -35,21 +35,39 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String username = null;
         String jwt = null;
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            jwt = authHeader.substring(7);
-            username = jwtUtil.extractUsername(jwt);
-        }
+        try {
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                jwt = authHeader.substring(7);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            if (jwtUtil.isTokenValid(jwt)) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                // Extract username (throws if token is expired or invalid)
+                username = jwtUtil.extractUsername(jwt);
             }
-        }
 
-        filterChain.doFilter(request, response);
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+                if (jwtUtil.isTokenValid(jwt)) {
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails, null, userDetails.getAuthorities());
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                } else {
+                    // Token expired → return 401
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    return;
+                }
+            }
+
+            filterChain.doFilter(request, response);
+
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            // Expired token → ALWAYS 401
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        } catch (Exception e) {
+            // Invalid token → 401
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        }
     }
+
 }
