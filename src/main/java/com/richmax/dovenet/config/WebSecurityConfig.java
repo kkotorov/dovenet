@@ -65,7 +65,7 @@ public class WebSecurityConfig {
                 .cors().and() // enable CORS
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/users/register", "/api/auth/login", "/api/users/forgot-password", "/api/users/reset-password", "/api/users/{username}").permitAll()
+                .requestMatchers("/api/users/register", "/api/auth/login", "/api/users/forgot-password", "/api/users/reset-password", "/api/users/{username}", "/api/pigeons/public/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()

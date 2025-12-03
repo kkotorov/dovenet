@@ -10,9 +10,6 @@ import com.richmax.dovenet.repository.data.User;
 import com.richmax.dovenet.service.LoftService;
 import com.richmax.dovenet.service.data.LoftDTO;
 import com.richmax.dovenet.mapper.LoftMapper;
-
-import com.richmax.dovenet.service.data.PigeonDTO;
-import com.richmax.dovenet.service.data.UserDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

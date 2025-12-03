@@ -35,4 +35,6 @@ public interface PigeonService {
     List<PigeonDTO> getPigeonsInLoft(Long loftId, String username);
 
     List<CompetitionEntryDTO> getCompetitionsForPigeon(Long pigeonId, String username);
+
+    PigeonDTO getPublicPigeon(Long pigeonId);
 }

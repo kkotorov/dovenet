@@ -26,6 +26,7 @@ import com.lowagie.text.*;
 import com.lowagie.text.pdf.*;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
+import java.util.logging.Logger;
 
 @Service
 public class PigeonServiceImpl implements PigeonService {
@@ -70,6 +71,19 @@ public class PigeonServiceImpl implements PigeonService {
 
         // Return DTO
         return convertToDto(pigeon);
+    }
+
+    @Override
+    public PigeonDTO getPublicPigeon(Long pigeonId) {
+        // Find pigeon
+        Pigeon pigeon = pigeonRepository.findById(pigeonId)
+                .orElseThrow(() -> new PigeonNotFoundException("Pigeon with ID " + pigeonId + " does not exist"));
+        PigeonDTO pigeonDTO = convertToDto(pigeon);
+        pigeonDTO.setOwner(null);
+        pigeonDTO.setLoftId(null);
+        pigeonDTO.setLoft(null);
+        Logger.getLogger("hi");
+        return pigeonDTO;
     }
 
     @Override
