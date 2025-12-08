@@ -34,6 +34,11 @@ public class CompetitionEntryServiceImpl implements CompetitionEntryService {
         Pigeon pigeon = pigeonRepository.findById(dto.getPigeon().getId())
                 .orElseThrow(() -> new RuntimeException("Pigeon not found"));
 
+        entryRepository.findByCompetitionAndPigeon(competition, pigeon)
+                .ifPresent(e -> {
+                    throw new RuntimeException("This pigeon is already entered in this competition");
+                });
+
         CompetitionEntry entry = entryMapper.toEntity(dto);
         entry.setCompetition(competition);
         entry.setPigeon(pigeon);

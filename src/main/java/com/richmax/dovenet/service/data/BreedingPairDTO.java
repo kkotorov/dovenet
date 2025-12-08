@@ -22,4 +22,6 @@ public class BreedingPairDTO {
     private String notes;
 
     private List<Long> offspringIds = new ArrayList<>();
+
+    private boolean inbred;
 }

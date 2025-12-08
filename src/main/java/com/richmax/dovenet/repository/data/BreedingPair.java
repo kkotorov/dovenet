@@ -37,4 +37,7 @@ public class BreedingPair {
             inverseJoinColumns = @JoinColumn(name = "pigeon_id")
     )
     private List<Pigeon> offspring = new ArrayList<>();
+
+    //@Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean inbred = false;
 }

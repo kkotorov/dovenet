@@ -17,12 +17,14 @@ public interface BreedingPairMapper {
     @Mapping(source = "malePigeon.ringNumber", target = "maleRing")
     @Mapping(source = "femalePigeon.ringNumber", target = "femaleRing")
     @Mapping(source = "offspring", target = "offspringIds")
+    @Mapping(source = "inbred", target = "inbred")
     BreedingPairDTO toDto(BreedingPair pair);
 
     @Mapping(target = "season", ignore = true)
     @Mapping(target = "malePigeon", ignore = true)
     @Mapping(target = "femalePigeon", ignore = true)
     @Mapping(target = "offspring", ignore = true)
+    @Mapping(source = "inbred", target = "inbred")
     BreedingPair toEntity(BreedingPairDTO dto);
 
     default List<Long> mapOffspring(List<Pigeon> offspring) {

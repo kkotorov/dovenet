@@ -130,8 +130,11 @@ public class BreedingServiceImpl implements BreedingService {
         pair.setMalePigeon(male);
         pair.setFemalePigeon(female);
 
+        pair.setInbred(isInbred(male, female));
+
         return breedingPairMapper.toDto(pairRepository.save(pair));
     }
+
 
     @Override
     @Transactional
@@ -211,6 +214,27 @@ public class BreedingServiceImpl implements BreedingService {
             throw new UnauthorizedActionException("This pigeon does not belong to you");
 
         return pigeon;
+    }
+
+    private boolean isInbred(Pigeon male, Pigeon female) {
+        if (male == null || female == null) return false;
+
+        String maleFather = male.getFatherRingNumber();
+        String maleMother = male.getMotherRingNumber();
+        String femaleFather = female.getFatherRingNumber();
+        String femaleMother = female.getMotherRingNumber();
+
+        // parent-child
+        if (male.getRingNumber().equals(femaleFather) || male.getRingNumber().equals(femaleMother)) return true;
+        if (female.getRingNumber().equals(maleFather) || female.getRingNumber().equals(maleMother)) return true;
+
+        // grandparent-grandchild (only check from male -> female)
+        if ((maleFather != null && (maleFather.equals(femaleFather) || maleFather.equals(femaleMother))) ||
+                (maleMother != null && (maleMother.equals(femaleFather) || maleMother.equals(femaleMother)))) {
+            return true;
+        }
+
+        return false;
     }
 
     @Override
