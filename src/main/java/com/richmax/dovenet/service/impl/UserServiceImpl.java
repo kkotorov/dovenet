@@ -10,6 +10,8 @@ import com.richmax.dovenet.service.UserService;
 import com.richmax.dovenet.service.data.UserDTO;
 import com.richmax.dovenet.types.SubscriptionType;
 import com.richmax.dovenet.types.UserRole;
+import com.stripe.model.Customer;
+import com.stripe.param.CustomerCreateParams;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -189,14 +191,19 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
+    @Transactional
     @Override
     public void deleteUser(String username) {
-        Optional<User> userOpt = userRepository.findByUsername(username);
-        if (userOpt.isPresent()) {
-            userRepository.delete(userOpt.get());
-        } else {
-            throw new RuntimeException("User not found");
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Remove any transient pigeons that are not saved yet
+        if (user.getPigeons() != null) {
+            user.getPigeons().removeIf(p -> p.getId() == null);
         }
+
+        // Now delete the user (cascade deletes any saved pigeons automatically)
+        userRepository.delete(user);
     }
 
     @Override
@@ -222,4 +229,26 @@ public class UserServiceImpl implements UserService {
         // Save and return DTO
         return convertToDto(userRepository.save(user));
     }
+
+    @Override
+    public String getOrCreateStripeCustomer(User user) {
+        if (user.getStripeCustomerId() != null) {
+            return user.getStripeCustomerId();
+        }
+        try {
+            Customer customer = Customer.create(CustomerCreateParams.builder().setEmail(user.getEmail()).setName(user.getUsername()).build());
+            user.setStripeCustomerId(customer.getId());
+            userRepository.save(user);
+            return customer.getId();
+        } catch (Exception e){
+            throw new RuntimeException("Stripe customer creation failed");
+        }
+    }
+
+    public boolean hasActiveSubscription(User user) {
+        return user.getSubscription() != SubscriptionType.FREE
+                && user.getSubscriptionValidUntil() != null
+                && user.getSubscriptionValidUntil().isAfter(LocalDateTime.now());
+    }
+
 }

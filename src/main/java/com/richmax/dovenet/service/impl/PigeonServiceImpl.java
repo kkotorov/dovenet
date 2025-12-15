@@ -16,8 +16,11 @@ import com.richmax.dovenet.service.PigeonService;
 import com.richmax.dovenet.service.data.CompetitionEntryDTO;
 import com.richmax.dovenet.service.data.PigeonDTO;
 import com.richmax.dovenet.service.data.PigeonPedigreeDTO;
+import com.richmax.dovenet.types.SubscriptionType;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -484,4 +487,11 @@ public class PigeonServiceImpl implements PigeonService {
                     return pigeonRepository.save(p);
                 });
     }
+
+    public boolean hasActiveSubscription(User user) {
+        return user.getSubscription() != SubscriptionType.FREE
+                && user.getSubscriptionValidUntil() != null
+                && user.getSubscriptionValidUntil().isAfter(LocalDateTime.now());
+    }
+
 }

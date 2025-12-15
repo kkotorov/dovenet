@@ -4,6 +4,8 @@ import com.richmax.dovenet.types.SubscriptionType;
 import com.richmax.dovenet.types.UserRole;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class UserDTO {
     private Long id;
@@ -21,4 +23,9 @@ public class UserDTO {
     private UserRole role;
 
     private String language;
+
+    // Stripe
+    private String stripeCustomerId;
+    private String stripeSubscriptionId;
+    private LocalDateTime subscriptionValidUntil;
 }

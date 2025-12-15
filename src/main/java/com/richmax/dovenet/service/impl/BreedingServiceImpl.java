@@ -14,10 +14,12 @@ import com.richmax.dovenet.repository.data.User;
 import com.richmax.dovenet.service.BreedingService;
 import com.richmax.dovenet.service.data.BreedingPairDTO;
 import com.richmax.dovenet.service.data.BreedingSeasonDTO;
+import com.richmax.dovenet.types.SubscriptionType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -251,4 +253,11 @@ public class BreedingServiceImpl implements BreedingService {
 
         return breedingPairMapper.toDto(pair);
     }
+
+    public boolean hasActiveSubscription(User user) {
+        return user.getSubscription() != SubscriptionType.FREE
+                && user.getSubscriptionValidUntil() != null
+                && user.getSubscriptionValidUntil().isAfter(LocalDateTime.now());
+    }
+
 }

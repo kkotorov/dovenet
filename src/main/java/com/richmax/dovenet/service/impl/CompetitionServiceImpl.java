@@ -9,9 +9,11 @@ import com.richmax.dovenet.repository.data.Competition;
 import com.richmax.dovenet.repository.data.User;
 import com.richmax.dovenet.service.CompetitionService;
 import com.richmax.dovenet.service.data.CompetitionDTO;
+import com.richmax.dovenet.types.SubscriptionType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -91,4 +93,11 @@ public class CompetitionServiceImpl implements CompetitionService {
 
         return competitionMapper.toDto(competition);
     }
+
+    public boolean hasActiveSubscription(User user) {
+        return user.getSubscription() != SubscriptionType.FREE
+                && user.getSubscriptionValidUntil() != null
+                && user.getSubscriptionValidUntil().isAfter(LocalDateTime.now());
+    }
+
 }

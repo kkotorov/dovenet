@@ -44,4 +44,5 @@ public interface UserService {
     @Transactional
     UserDTO updateUserSettings(String username, UserDTO updates);
 
+    String getOrCreateStripeCustomer(User user);
 }

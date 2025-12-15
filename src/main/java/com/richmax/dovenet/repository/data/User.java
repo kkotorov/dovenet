@@ -66,4 +66,15 @@ public class User {
     private UserRole role = UserRole.USER;
 
     private String language = "en";
+
+    // Stripe
+    @Column(name = "stripe_customer_id")
+    private String stripeCustomerId;
+
+    @Column(name = "stripe_subscription_id")
+    private String stripeSubscriptionId;
+
+    @Column(name = "subscription_valid_until")
+    private LocalDateTime subscriptionValidUntil;
+
 }
