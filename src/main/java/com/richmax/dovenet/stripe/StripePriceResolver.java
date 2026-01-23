@@ -27,4 +27,18 @@ public class StripePriceResolver {
             default -> throw new IllegalArgumentException("FREE has no Stripe price");
         };
     }
+
+    /** Helper for webhooks: map a Stripe priceId back to SubscriptionType */
+    public SubscriptionType resolvePriceToSubscriptionType(String priceId) {
+        if (priceId.equals(premiumMonthly) || priceId.equals(premiumYearly)) return SubscriptionType.PREMIUM;
+        if (priceId.equals(proMonthly) || priceId.equals(proYearly)) return SubscriptionType.PRO;
+        return SubscriptionType.FREE;
+    }
+
+    /** Helper: map a Stripe priceId to billing period */
+    public BillingPeriod resolvePriceToBillingPeriod(String priceId) {
+        if (priceId.equals(premiumMonthly) || priceId.equals(proMonthly)) return BillingPeriod.MONTHLY;
+        if (priceId.equals(premiumYearly) || priceId.equals(proYearly)) return BillingPeriod.YEARLY;
+        throw new IllegalArgumentException("Unknown Stripe priceId: " + priceId);
+    }
 }

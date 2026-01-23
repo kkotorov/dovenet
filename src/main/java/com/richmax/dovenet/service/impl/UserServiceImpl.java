@@ -48,6 +48,9 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(password));
 
         user.setSubscription(SubscriptionType.FREE);
+        // Set 10-day free trial
+        user.setSubscriptionValidUntil(LocalDateTime.now().plusDays(10));
+        
         user.setRole(UserRole.USER);
         user.setLanguage("en");
 
@@ -241,13 +244,16 @@ public class UserServiceImpl implements UserService {
             userRepository.save(user);
             return customer.getId();
         } catch (Exception e){
-            throw new RuntimeException("Stripe customer creation failed");
+            // Include the original exception cause
+            throw new RuntimeException("Stripe customer creation failed: " + e.getMessage(), e);
         }
     }
 
+    // TODO: Enforce this check in API endpoints (Backend Protection).
+    // Currently, restrictions are only applied on the frontend.
     public boolean hasActiveSubscription(User user) {
-        return user.getSubscription() != SubscriptionType.FREE
-                && user.getSubscriptionValidUntil() != null
+        // Check if subscription is valid (works for FREE trial and PAID subscriptions)
+        return user.getSubscriptionValidUntil() != null
                 && user.getSubscriptionValidUntil().isAfter(LocalDateTime.now());
     }
 

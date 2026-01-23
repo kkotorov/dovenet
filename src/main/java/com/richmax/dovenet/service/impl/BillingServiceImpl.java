@@ -45,6 +45,11 @@ public class BillingServiceImpl implements BillingService {
                     .setSuccessUrl("https://www.dovenet.eu/billing/success")
                     .setCancelUrl("https://www.dovenet.eu/billing/cancel")
                     .setAutomaticTax(SessionCreateParams.AutomaticTax.builder().setEnabled(true).build())
+                    .setCustomerUpdate(
+                            SessionCreateParams.CustomerUpdate.builder()
+                                    .setAddress(SessionCreateParams.CustomerUpdate.Address.AUTO)
+                                    .build()
+                    )
                     .build();
             Session session = Session.create(params);
 
