@@ -257,4 +257,12 @@ public class UserServiceImpl implements UserService {
                 && user.getSubscriptionValidUntil().isAfter(LocalDateTime.now());
     }
 
+    @Override
+    public void expireSubscriptionNow(String username) {
+        User user = findByUsername(username);
+        // Set to yesterday
+        user.setSubscriptionValidUntil(LocalDateTime.now().minusDays(1));
+        userRepository.save(user);
+    }
+
 }

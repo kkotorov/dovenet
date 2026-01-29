@@ -45,4 +45,9 @@ public interface UserService {
     UserDTO updateUserSettings(String username, UserDTO updates);
 
     String getOrCreateStripeCustomer(User user);
+
+    boolean hasActiveSubscription(User user);
+
+    // FOR TESTING ONLY
+    void expireSubscriptionNow(String username);
 }

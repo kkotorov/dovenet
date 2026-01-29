@@ -154,7 +154,8 @@ public class UserController {
         return ResponseEntity.ok(Map.of(
             "active", isActive,
             "type", user.getSubscription(),
-            "validUntil", user.getSubscriptionValidUntil() != null ? user.getSubscriptionValidUntil() : "null"
+            "validUntil", user.getSubscriptionValidUntil() != null ? user.getSubscriptionValidUntil() : "null",
+            "autoRenew", user.isAutoRenew()
         ));
     }
 
