@@ -173,13 +173,20 @@ public class StripeWebhookServiceImpl implements StripeWebhookService {
         com.stripe.model.Subscription subscription = (com.stripe.model.Subscription) stripeObject;
         String customerId = subscription.getCustomer();
         Optional<User> optionalUser = userRepository.findByStripeCustomerId(customerId);
+        
         optionalUser.ifPresent(user -> {
-            user.setSubscription(SubscriptionType.FREE);
-            user.setStripeSubscriptionId(null);
-            user.setSubscriptionValidUntil(null);
-            user.setAutoRenew(false); // Subscription is gone, so no auto-renew
-            userRepository.save(user);
-            System.out.println("Subscription deleted for user: " + user.getUsername());
+            // IMPORTANT: Only revert to FREE if the deleted subscription is the one we have on record.
+            // This prevents an old, canceled subscription from overwriting a newer, active one.
+            if (subscription.getId().equals(user.getStripeSubscriptionId())) {
+                user.setSubscription(SubscriptionType.FREE);
+                user.setStripeSubscriptionId(null);
+                user.setSubscriptionValidUntil(null);
+                user.setAutoRenew(false);
+                userRepository.save(user);
+                System.out.println("Active subscription " + subscription.getId() + " deleted for user: " + user.getUsername() + ". Reverting to FREE.");
+            } else {
+                System.out.println("Ignoring deletion of old subscription " + subscription.getId() + " for user: " + user.getUsername() + ". Active subscription is " + user.getStripeSubscriptionId());
+            }
         });
     }
 }
