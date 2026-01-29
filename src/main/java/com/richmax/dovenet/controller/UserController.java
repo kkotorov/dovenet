@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -142,5 +143,25 @@ public class UserController {
     ) {
         String username = authentication.getName();
         return userService.updateUserSettings(username, updates);
+    }
+
+    @GetMapping("/me/subscription-status")
+    public ResponseEntity<Map<String, Object>> getSubscriptionStatus(Authentication authentication) {
+        String username = authentication.getName();
+        User user = userService.findByUsername(username);
+        boolean isActive = userService.hasActiveSubscription(user);
+        
+        return ResponseEntity.ok(Map.of(
+            "active", isActive,
+            "type", user.getSubscription(),
+            "validUntil", user.getSubscriptionValidUntil() != null ? user.getSubscriptionValidUntil() : "null"
+        ));
+    }
+
+    // FOR TESTING ONLY
+    @PostMapping("/me/expire-subscription")
+    public ResponseEntity<String> expireSubscription(Authentication authentication) {
+        userService.expireSubscriptionNow(authentication.getName());
+        return ResponseEntity.ok("Subscription expired for testing.");
     }
 }

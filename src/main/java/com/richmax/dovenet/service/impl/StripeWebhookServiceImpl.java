@@ -15,10 +15,7 @@ import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Optional;
 
 @Service
@@ -140,6 +137,9 @@ public class StripeWebhookServiceImpl implements StripeWebhookService {
         System.out.println("Resolved Subscription Type: " + type);
 
         user.setSubscription(type);
+        
+        // Update auto-renew status
+        user.setAutoRenew(!subscription.getCancelAtPeriodEnd());
 
         // Manual calculation since getCurrentPeriodEnd() is missing in this library version
         BillingPeriod period = priceResolver.resolvePriceToBillingPeriod(priceId);
@@ -177,6 +177,7 @@ public class StripeWebhookServiceImpl implements StripeWebhookService {
             user.setSubscription(SubscriptionType.FREE);
             user.setStripeSubscriptionId(null);
             user.setSubscriptionValidUntil(null);
+            user.setAutoRenew(false); // Subscription is gone, so no auto-renew
             userRepository.save(user);
             System.out.println("Subscription deleted for user: " + user.getUsername());
         });

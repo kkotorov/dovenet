@@ -77,4 +77,6 @@ public class User {
     @Column(name = "subscription_valid_until")
     private LocalDateTime subscriptionValidUntil;
 
+    @Column(name = "auto_renew")
+    private boolean autoRenew = false;
 }

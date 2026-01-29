@@ -28,4 +28,5 @@ public class UserDTO {
     private String stripeCustomerId;
     private String stripeSubscriptionId;
     private LocalDateTime subscriptionValidUntil;
+    private boolean autoRenew;
 }
