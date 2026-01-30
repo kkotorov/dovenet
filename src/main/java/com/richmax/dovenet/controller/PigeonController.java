@@ -98,4 +98,9 @@ public class PigeonController {
     public PigeonDTO getPigeonPublic(@PathVariable Long id) {
         return pigeonService.getPublicPigeon(id);
     }
+
+    @GetMapping("/public/{id}/competitions")
+    public List<CompetitionEntryDTO> getPublicCompetitionsForPigeon(@PathVariable Long id, Authentication authentication) {
+        return pigeonService.getCompetitionsForPigeon(id, authentication.getName());
+    }
 }
