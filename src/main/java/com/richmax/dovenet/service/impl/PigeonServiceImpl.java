@@ -18,6 +18,8 @@ import com.richmax.dovenet.service.data.PigeonDTO;
 import com.richmax.dovenet.service.data.PigeonPedigreeDTO;
 import com.richmax.dovenet.types.SubscriptionType;
 import jakarta.transaction.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -58,17 +60,16 @@ public class PigeonServiceImpl implements PigeonService {
     }
 
     @Override
-    public PigeonDTO getPigeonById(Long id, String username) {
-        // Get user
-        User owner = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("Username does not exist"));
-
+    public PigeonDTO getPigeonById(Long id, Authentication authentication) {
         // Find pigeon
         Pigeon pigeon = pigeonRepository.findById(id)
                 .orElseThrow(() -> new PigeonNotFoundException("Pigeon with ID " + id + " does not exist"));
 
-        // Ensure it belongs to the authenticated user
-        if (!pigeon.getOwner().getId().equals(owner.getId())) {
+        // Check if user is admin
+        boolean isAdmin = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+
+        // Ensure it belongs to the authenticated user OR user is admin
+        if (!isAdmin && !pigeon.getOwner().getUsername().equals(authentication.getName())) {
             throw new UnauthorizedActionException("You cannot access pigeons you don't own");
         }
 

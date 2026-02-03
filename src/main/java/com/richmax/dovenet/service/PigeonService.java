@@ -4,13 +4,14 @@ import com.richmax.dovenet.repository.data.Pigeon;
 import com.richmax.dovenet.service.data.CompetitionEntryDTO;
 import com.richmax.dovenet.service.data.PigeonDTO;
 import com.richmax.dovenet.service.data.PigeonPedigreeDTO;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
 public interface PigeonService {
     List<PigeonDTO> getAllPigeons(String username);
 
-    PigeonDTO getPigeonById(Long id, String username);
+    PigeonDTO getPigeonById(Long id, Authentication authentication);
 
     PigeonDTO createPigeon(PigeonDTO pigeonDTO, String username);
 

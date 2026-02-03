@@ -79,4 +79,14 @@ public class User {
 
     @Column(name = "auto_renew")
     private boolean autoRenew = false;
+
+    // --- Login Tracking ---
+    @Column(name = "last_login_date")
+    private LocalDateTime lastLoginDate;
+
+    @Column(name = "last_login_ip")
+    private String lastLoginIp;
+
+    @Column(name = "last_login_user_agent")
+    private String lastLoginUserAgent;
 }

@@ -29,4 +29,9 @@ public class UserDTO {
     private String stripeSubscriptionId;
     private LocalDateTime subscriptionValidUntil;
     private boolean autoRenew;
+
+    // Login Tracking
+    private LocalDateTime lastLoginDate;
+    private String lastLoginIp;
+    private String lastLoginUserAgent;
 }

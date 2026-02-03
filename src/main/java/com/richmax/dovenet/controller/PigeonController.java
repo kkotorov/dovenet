@@ -27,7 +27,8 @@ public class PigeonController {
 
     @GetMapping("/{id}")
     public PigeonDTO getPigeonById(@PathVariable Long id, Authentication authentication) {
-        return pigeonService.getPigeonById(id, authentication.getName());
+        // Pass the full Authentication object to allow role checking
+        return pigeonService.getPigeonById(id, authentication);
     }
 
     @PostMapping
