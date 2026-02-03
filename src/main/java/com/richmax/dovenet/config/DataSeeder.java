@@ -4,6 +4,7 @@ import com.richmax.dovenet.repository.UserRepository;
 import com.richmax.dovenet.repository.data.User;
 import com.richmax.dovenet.types.SubscriptionType;
 import com.richmax.dovenet.types.UserRole;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,15 @@ public class DataSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${admin.username}")
+    private String adminUsername;
+
+    @Value("${admin.email}")
+    private String adminEmail;
+
+    @Value("${admin.password}")
+    private String adminPassword;
+
     public DataSeeder(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -21,11 +31,11 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (userRepository.findByUsername("admin").isEmpty()) {
+        if (userRepository.findByUsername(adminUsername).isEmpty()) {
             User admin = new User();
-            admin.setUsername("admin");
-            admin.setEmail("richmax@gmail.com");
-            admin.setPassword(passwordEncoder.encode("admin123")); // Change this immediately!
+            admin.setUsername(adminUsername);
+            admin.setEmail(adminEmail);
+            admin.setPassword(passwordEncoder.encode(adminPassword));
             admin.setRole(UserRole.ADMIN);
             admin.setSubscription(SubscriptionType.PRO); // Admin gets everything
             admin.setEmailVerified(true);
@@ -33,7 +43,7 @@ public class DataSeeder implements CommandLineRunner {
             admin.setLastName("Admin");
             
             userRepository.save(admin);
-            System.out.println("ADMIN ACCOUNT CREATED: username=admin, password=admin123");
+            System.out.println("ADMIN ACCOUNT CREATED: username=" + adminUsername);
         }
     }
 }
