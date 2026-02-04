@@ -20,34 +20,29 @@ public interface UserService {
     void generateAndSendVerificationEmail(User user);
 
     boolean verifyEmail(String token);
-
-    User findByUsername(String username);
-
-    User findById(Long id);
+    
+    User findByEmail(String email);
 
     UserDTO convertToDto(User user);
 
-    User convertToEntity(UserDTO userDTO);
+    User changeEmail(String email, String newEmail, String currentPassword);
 
-    User changeEmail(String username, String newEmail, String currentPassword);
-
-    User changePassword(String username, String oldPassword, String newPassword);
+    User changePassword(String email, String oldPassword, String newPassword);
 
     void initiatePasswordReset(String email);
 
     boolean resetPassword(String token, String newPassword);
 
-    void deleteUser(String username);
+    void deleteUserByEmail(String email);
 
-    UserDTO updateSubscription(String username, SubscriptionType type);
+    UserDTO updateSubscription(String email, SubscriptionType type);
 
     @Transactional
-    UserDTO updateUserSettings(String username, UserDTO updates);
+    UserDTO updateUserSettings(String email, UserDTO updates);
 
     String getOrCreateStripeCustomer(User user);
 
     boolean hasActiveSubscription(User user);
 
-    // FOR TESTING ONLY
-    void expireSubscriptionNow(String username);
+    void expireSubscriptionNow(String email);
 }

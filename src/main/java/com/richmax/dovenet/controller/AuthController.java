@@ -31,9 +31,10 @@ public class AuthController {
 
     @PostMapping("/login")
     public Map<String, String> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
-        User user = userService.findByUsername(request.getUsername());
+        // Find user by email now
+        User user = userService.findByEmail(request.getEmail());
         if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new UserNotFoundException("Invalid username or password");
+            throw new UserNotFoundException("Invalid email or password");
         }
 
         // Track login
@@ -42,7 +43,8 @@ public class AuthController {
         user.setLastLoginUserAgent(httpRequest.getHeader("User-Agent"));
         userRepository.save(user);
 
-        String token = jwtUtil.generateToken(user.getUsername());
+        // Generate token with email as the subject
+        String token = jwtUtil.generateToken(user.getEmail());
         return Map.of("token", token);
     }
 }

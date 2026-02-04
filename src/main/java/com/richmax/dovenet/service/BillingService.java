@@ -7,10 +7,10 @@ public interface BillingService {
     /**
      * Creates a Stripe checkout session and returns the URL
      */
-    String createCheckoutSession(String username, SubscriptionType type, BillingPeriod period);
+    String createCheckoutSession(String email, SubscriptionType type, BillingPeriod period);
 
     /**
      * Cancels the user's active subscription at the end of the billing period.
      */
-    void cancelSubscription(String username);
+    void cancelSubscription(String email);
 }

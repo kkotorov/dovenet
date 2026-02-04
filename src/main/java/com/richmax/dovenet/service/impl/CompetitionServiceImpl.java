@@ -25,9 +25,9 @@ public class CompetitionServiceImpl implements CompetitionService {
     private final CompetitionMapper competitionMapper;
 
     @Override
-    public CompetitionDTO createCompetition(CompetitionDTO dto, String username) {
-        User owner = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public CompetitionDTO createCompetition(CompetitionDTO dto, String email) {
+        User owner = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email " + email + " not found"));
 
         Competition competition = competitionMapper.toEntity(dto);
         competition.setOwner(owner);
@@ -36,11 +36,11 @@ public class CompetitionServiceImpl implements CompetitionService {
     }
 
     @Override
-    public CompetitionDTO updateCompetition(Long id, CompetitionDTO dto, String username) {
+    public CompetitionDTO updateCompetition(Long id, CompetitionDTO dto, String email) {
         Competition competition = competitionRepository.findById(id)
                 .orElseThrow(() -> new CompetitionEntryNotFoundException("Competition not found"));
 
-        if (!competition.getOwner().getUsername().equals(username)) {
+        if (!competition.getOwner().getEmail().equals(email)) {
             throw new UnauthorizedActionException("You cannot update competitions you don't own");
         }
 
@@ -61,11 +61,11 @@ public class CompetitionServiceImpl implements CompetitionService {
     }
 
     @Override
-    public void deleteCompetition(Long id, String username) {
+    public void deleteCompetition(Long id, String email) {
         Competition competition = competitionRepository.findById(id)
                 .orElseThrow(() -> new CompetitionEntryNotFoundException("Competition not found"));
 
-        if (!competition.getOwner().getUsername().equals(username)) {
+        if (!competition.getOwner().getEmail().equals(email)) {
             throw new UnauthorizedActionException("You cannot delete competitions you don't own");
         }
 
@@ -73,9 +73,9 @@ public class CompetitionServiceImpl implements CompetitionService {
     }
 
     @Override
-    public List<CompetitionDTO> getUserCompetitions(String username) {
-        User owner = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public List<CompetitionDTO> getUserCompetitions(String email) {
+        User owner = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email " + email + " not found"));
 
         return competitionRepository.findByOwner(owner).stream()
                 .map(competitionMapper::toDto)
@@ -83,11 +83,11 @@ public class CompetitionServiceImpl implements CompetitionService {
     }
 
     @Override
-    public CompetitionDTO getCompetitionById(Long id, String username) {
+    public CompetitionDTO getCompetitionById(Long id, String email) {
         Competition competition = competitionRepository.findById(id)
                 .orElseThrow(() -> new CompetitionEntryNotFoundException("Competition not found"));
 
-        if (!competition.getOwner().getUsername().equals(username)) {
+        if (!competition.getOwner().getEmail().equals(email)) {
             throw new UnauthorizedActionException("You cannot access competitions you don't own");
         }
 

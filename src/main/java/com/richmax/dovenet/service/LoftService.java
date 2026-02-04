@@ -6,13 +6,13 @@ import java.util.List;
 
 public interface LoftService {
 
-    LoftDTO createLoft(LoftDTO dto, String username);
+    LoftDTO createLoft(LoftDTO dto, String email);
 
-    List<LoftDTO> getUserLofts(String username);
+    List<LoftDTO> getUserLofts(String email);
 
-    LoftDTO getLoftById(Long id, String username);
+    LoftDTO getLoftById(Long id, String email);
 
-    LoftDTO updateLoft(Long id, LoftDTO dto, String username);
+    LoftDTO updateLoft(Long id, LoftDTO dto, String email);
 
-    void deleteLoft(Long id, String username);
+    void deleteLoft(Long id, String email);
 }

@@ -16,8 +16,6 @@ public interface CompetitionEntryRepository extends JpaRepository<CompetitionEnt
 
     List<CompetitionEntry> findByCompetitionId(Long competitionId);
 
-    List<CompetitionEntry> findByPigeonId(Long pigeonId);
-
     Optional<CompetitionEntry> findByCompetitionAndPigeon(Competition competition, Pigeon pigeon);
 
 }

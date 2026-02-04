@@ -7,13 +7,11 @@ import com.richmax.dovenet.security.JwtUtil;
 import com.richmax.dovenet.service.UserService;
 import com.richmax.dovenet.service.data.UserDTO;
 import com.richmax.dovenet.types.SubscriptionType;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,17 +52,8 @@ public class UserController {
     }
 
     @GetMapping("/trigger-verify")
-    public ResponseEntity<String> triggerEmailVerification(@RequestHeader("Authorization") String authHeader) {
-        // Extract username from JWT
-        String username = jwtUtil.extractUsername(authHeader.replace("Bearer ", ""));
-
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-
-        if (optionalUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
-        }
-
-        User user = optionalUser.get();
+    public ResponseEntity<String> triggerEmailVerification(Authentication authentication) {
+        User user = userService.findByEmail(authentication.getName());
 
         if (user.isEmailVerified()) {
             return ResponseEntity.badRequest().body("Email is already verified");
@@ -76,38 +65,23 @@ public class UserController {
         return ResponseEntity.ok("Verification email sent successfully");
     }
 
-
-    @DeleteMapping("/{username}")
-    public ResponseEntity<String> deleteUser(@PathVariable String username) {
-        try {
-            userService.deleteUser(username);
-            return ResponseEntity.ok("User deleted successfully");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
     @GetMapping("/me")
-    public UserDTO getCurrentUser(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String username = jwtUtil.extractUsername(token);
-        User user = userService.findByUsername(username);
+    public UserDTO getCurrentUser(Authentication authentication) {
+        User user = userService.findByEmail(authentication.getName());
         return userService.convertToDto(user);
     }
 
     @PatchMapping("/me/change-email")
-    public ResponseEntity<UserDTO> changeEmail(@RequestHeader("Authorization") String authHeader,
+    public ResponseEntity<UserDTO> changeEmail(Authentication authentication,
                                                @RequestBody ChangeEmailRequest request) {
-        String username = jwtUtil.extractUsername(authHeader.replace("Bearer ", ""));
-        User updatedUser = userService.changeEmail(username, request.getNewEmail(), request.getPassword());
+        User updatedUser = userService.changeEmail(authentication.getName(), request.getNewEmail(), request.getPassword());
         return ResponseEntity.ok(userService.convertToDto(updatedUser));
     }
 
     @PatchMapping("/me/change-password")
-    public ResponseEntity<UserDTO> changePassword(@RequestHeader("Authorization") String authHeader,
+    public ResponseEntity<UserDTO> changePassword(Authentication authentication,
                                                   @RequestBody ChangePasswordRequest request) {
-        String username = jwtUtil.extractUsername(authHeader.replace("Bearer ", ""));
-        User updatedUser = userService.changePassword(username, request.getOldPassword(), request.getNewPassword());
+        User updatedUser = userService.changePassword(authentication.getName(), request.getOldPassword(), request.getNewPassword());
         return ResponseEntity.ok(userService.convertToDto(updatedUser));
     }
 
@@ -131,8 +105,7 @@ public class UserController {
             @RequestParam SubscriptionType type,
             Authentication authentication
     ) {
-        String username = authentication.getName();
-        return userService.updateSubscription(username, type);
+        return userService.updateSubscription(authentication.getName(), type);
     }
 
 
@@ -141,14 +114,12 @@ public class UserController {
             @RequestBody UserDTO updates,
             Authentication authentication
     ) {
-        String username = authentication.getName();
-        return userService.updateUserSettings(username, updates);
+        return userService.updateUserSettings(authentication.getName(), updates);
     }
 
     @GetMapping("/me/subscription-status")
     public ResponseEntity<Map<String, Object>> getSubscriptionStatus(Authentication authentication) {
-        String username = authentication.getName();
-        User user = userService.findByUsername(username);
+        User user = userService.findByEmail(authentication.getName());
         boolean isActive = userService.hasActiveSubscription(user);
         
         return ResponseEntity.ok(Map.of(
@@ -157,12 +128,5 @@ public class UserController {
             "validUntil", user.getSubscriptionValidUntil() != null ? user.getSubscriptionValidUntil() : "null",
             "autoRenew", user.isAutoRenew()
         ));
-    }
-
-    // FOR TESTING ONLY
-    @PostMapping("/me/expire-subscription")
-    public ResponseEntity<String> expireSubscription(Authentication authentication) {
-        userService.expireSubscriptionNow(authentication.getName());
-        return ResponseEntity.ok("Subscription expired for testing.");
     }
 }

@@ -21,15 +21,14 @@ public class CompetitionEntryServiceImpl implements CompetitionEntryService {
     private final CompetitionEntryRepository entryRepository;
     private final CompetitionRepository competitionRepository;
     private final PigeonRepository pigeonRepository;
-    private final UserRepository userRepository;
     private final CompetitionEntryMapper entryMapper;
 
     @Override
-    public CompetitionEntryDTO addPigeonToCompetition(CompetitionEntryDTO dto, String username) {
+    public CompetitionEntryDTO addPigeonToCompetition(CompetitionEntryDTO dto, String email) {
         Competition competition = competitionRepository.findById(dto.getCompetition().getId())
                 .orElseThrow(() -> new RuntimeException("Competition not found"));
 
-        if (!competition.getOwner().getUsername().equals(username)) {
+        if (!competition.getOwner().getEmail().equals(email)) {
             throw new UnauthorizedActionException("You cannot add pigeons to competitions you don't own");
         }
 
@@ -49,11 +48,11 @@ public class CompetitionEntryServiceImpl implements CompetitionEntryService {
     }
 
     @Override
-    public CompetitionEntryDTO updateEntry(Long id, CompetitionEntryDTO dto, String username) {
+    public CompetitionEntryDTO updateEntry(Long id, CompetitionEntryDTO dto, String email) {
         CompetitionEntry entry = entryRepository.findById(id)
                 .orElseThrow(() -> new CompetitionEntryNotFoundException("Entry not found"));
 
-        if (!entry.getCompetition().getOwner().getUsername().equals(username)) {
+        if (!entry.getCompetition().getOwner().getEmail().equals(email)) {
             throw new UnauthorizedActionException("You cannot update entries you don't own");
         }
 
@@ -67,11 +66,11 @@ public class CompetitionEntryServiceImpl implements CompetitionEntryService {
     }
 
     @Override
-    public void removeEntry(Long id, String username) {
+    public void removeEntry(Long id, String email) {
         CompetitionEntry entry = entryRepository.findById(id)
                 .orElseThrow(() -> new CompetitionEntryNotFoundException("Entry not found"));
 
-        if (!entry.getCompetition().getOwner().getUsername().equals(username)) {
+        if (!entry.getCompetition().getOwner().getEmail().equals(email)) {
             throw new UnauthorizedActionException("You cannot remove entries you don't own");
         }
 
@@ -79,11 +78,11 @@ public class CompetitionEntryServiceImpl implements CompetitionEntryService {
     }
 
     @Override
-    public List<CompetitionEntryDTO> getEntriesForCompetition(Long competitionId, String username) {
+    public List<CompetitionEntryDTO> getEntriesForCompetition(Long competitionId, String email) {
         Competition competition = competitionRepository.findById(competitionId)
                 .orElseThrow(() -> new RuntimeException("Competition not found"));
 
-        if (!competition.getOwner().getUsername().equals(username)) {
+        if (!competition.getOwner().getEmail().equals(email)) {
             throw new UnauthorizedActionException("You cannot view entries you don't own");
         }
 
@@ -94,13 +93,13 @@ public class CompetitionEntryServiceImpl implements CompetitionEntryService {
     }
 
     @Override
-    public List<CompetitionEntryDTO> getEntriesForPigeon(Long pigeonId, String username) {
+    public List<CompetitionEntryDTO> getEntriesForPigeon(Long pigeonId, String email) {
         Pigeon pigeon = pigeonRepository.findById(pigeonId)
                 .orElseThrow(() -> new RuntimeException("Pigeon not found"));
 
         return entryRepository.findByPigeon(pigeon)
                 .stream()
-                .filter(e -> e.getCompetition().getOwner().getUsername().equals(username))
+                .filter(e -> e.getCompetition().getOwner().getEmail().equals(email))
                 .map(entryMapper::toDto)
                 .toList();
     }

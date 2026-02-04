@@ -95,14 +95,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("User " + username + " not found"));
-    }
-
-    @Override
-    public User findById(Long id) {
-        return userRepository.findById(id).orElse(null);
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User with email " + email + " not found"));
     }
 
     @Override
@@ -111,13 +106,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User convertToEntity(UserDTO userDTO) {
-        return userMapper.toEntity(userDTO);
-    }
-
-    @Override
-    public User changeEmail(String username, String newEmail, String currentPassword) {
-        User user = findByUsername(username);
+    public User changeEmail(String email, String newEmail, String currentPassword) {
+        User user = findByEmail(email);
 
         // Verify password
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
@@ -148,8 +138,8 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public User changePassword(String username, String oldPassword, String newPassword) {
-        User user = findByUsername(username);
+    public User changePassword(String email, String oldPassword, String newPassword) {
+        User user = findByEmail(email);
 
         // Verify old password
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
@@ -203,8 +193,8 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public void deleteUser(String username) {
-        User user = userRepository.findByUsername(username)
+    public void deleteUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Manually delete related entities to avoid foreign key constraints
@@ -227,8 +217,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO updateSubscription(String username, SubscriptionType type) {
-        User user = findByUsername(username);
+    public UserDTO updateSubscription(String email, SubscriptionType type) {
+        User user = findByEmail(email);
         user.setSubscription(type);
         User updatedUser = userRepository.save(user);
         return convertToDto(updatedUser);
@@ -236,8 +226,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDTO updateUserSettings(String username, UserDTO updates) {
-        User user = findByUsername(username);
+    public UserDTO updateUserSettings(String email, UserDTO updates) {
+        User user = findByEmail(email);
 
         // Update allowed fields only if present
         if (updates.getFirstName() != null) user.setFirstName(updates.getFirstName());
@@ -275,8 +265,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void expireSubscriptionNow(String username) {
-        User user = findByUsername(username);
+    public void expireSubscriptionNow(String email) {
+        User user = findByEmail(email);
         // Set to yesterday
         user.setSubscriptionValidUntil(LocalDateTime.now().minusDays(1));
         userRepository.save(user);

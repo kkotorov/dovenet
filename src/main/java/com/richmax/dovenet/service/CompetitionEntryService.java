@@ -6,13 +6,13 @@ import java.util.List;
 
 public interface CompetitionEntryService {
 
-    CompetitionEntryDTO addPigeonToCompetition(CompetitionEntryDTO dto, String username);
+    CompetitionEntryDTO addPigeonToCompetition(CompetitionEntryDTO dto, String email);
 
-    CompetitionEntryDTO updateEntry(Long id, CompetitionEntryDTO dto, String username);
+    CompetitionEntryDTO updateEntry(Long id, CompetitionEntryDTO dto, String email);
 
-    void removeEntry(Long id, String username);
+    void removeEntry(Long id, String email);
 
-    List<CompetitionEntryDTO> getEntriesForCompetition(Long competitionId, String username);
+    List<CompetitionEntryDTO> getEntriesForCompetition(Long competitionId, String email);
 
-    List<CompetitionEntryDTO> getEntriesForPigeon(Long pigeonId, String username);
+    List<CompetitionEntryDTO> getEntriesForPigeon(Long pigeonId, String email);
 }

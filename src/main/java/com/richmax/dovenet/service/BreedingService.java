@@ -8,29 +8,29 @@ import java.util.List;
 public interface BreedingService {
 
     // --- SEASONS ---
-    List<BreedingSeasonDTO> getSeasons(String username);
+    List<BreedingSeasonDTO> getSeasons(String email);
 
-    BreedingSeasonDTO createSeason(BreedingSeasonDTO dto, String username);
+    BreedingSeasonDTO createSeason(BreedingSeasonDTO dto, String email);
 
-    BreedingSeasonDTO getSeason(Long id, String username);
+    BreedingSeasonDTO getSeason(Long id, String email);
 
-    BreedingSeasonDTO updateSeason(Long id, BreedingSeasonDTO dto, String username);
+    BreedingSeasonDTO updateSeason(Long id, BreedingSeasonDTO dto, String email);
 
-    void deleteSeason(Long id, String username);
+    void deleteSeason(Long id, String email);
 
     // --- PAIRS ---
-    List<BreedingPairDTO> getPairs(Long seasonId, String username);
+    List<BreedingPairDTO> getPairs(Long seasonId, String email);
 
-    BreedingPairDTO getPair(Long id, String username);
+    BreedingPairDTO getPair(Long id, String email);
 
-    BreedingPairDTO addPair(Long seasonId, BreedingPairDTO dto, String username);
+    BreedingPairDTO addPair(Long seasonId, BreedingPairDTO dto, String email);
 
-    BreedingPairDTO updatePair(Long id, BreedingPairDTO dto, String username);
+    BreedingPairDTO updatePair(Long id, BreedingPairDTO dto, String email);
 
-    void deletePair(Long id, String username);
+    void deletePair(Long id, String email);
 
     // --- OFFSPRING ---
-    BreedingPairDTO addOffspring(Long pairId, Long pigeonId, String username);
+    BreedingPairDTO addOffspring(Long pairId, Long pigeonId, String email);
 
-    BreedingPairDTO removeOffspring(Long pairId, Long pigeonId, String username);
+    BreedingPairDTO removeOffspring(Long pairId, Long pigeonId, String email);
 }

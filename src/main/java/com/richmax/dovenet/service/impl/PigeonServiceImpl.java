@@ -50,9 +50,9 @@ public class PigeonServiceImpl implements PigeonService {
     }
 
     @Override
-    public List<PigeonDTO> getAllPigeons(String username) {
-        User owner = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Username does not exist"));
+    public List<PigeonDTO> getAllPigeons(String email) {
+        User owner = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email " + email + " does not exist"));
 
         return pigeonRepository.findByOwner(owner).stream()
                 .map(this::convertToDto)
@@ -69,7 +69,7 @@ public class PigeonServiceImpl implements PigeonService {
         boolean isAdmin = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
 
         // Ensure it belongs to the authenticated user OR user is admin
-        if (!isAdmin && !pigeon.getOwner().getUsername().equals(authentication.getName())) {
+        if (!isAdmin && !pigeon.getOwner().getEmail().equals(authentication.getName())) {
             throw new UnauthorizedActionException("You cannot access pigeons you don't own");
         }
 
@@ -91,9 +91,9 @@ public class PigeonServiceImpl implements PigeonService {
     }
 
     @Override
-    public PigeonDTO createPigeon(PigeonDTO pigeonDTO, String username) {
-        User owner = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Username does not exist"));
+    public PigeonDTO createPigeon(PigeonDTO pigeonDTO, String email) {
+        User owner = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email " + email + " does not exist"));
 
         Pigeon pigeon = convertToEntity(pigeonDTO);
         pigeon.setOwner(owner);
@@ -115,9 +115,9 @@ public class PigeonServiceImpl implements PigeonService {
 
     @Override
     @Transactional
-    public PigeonDTO updatePigeon(Long id, PigeonDTO pigeonDTO, String username) {
-        User owner = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Username does not exist"));
+    public PigeonDTO updatePigeon(Long id, PigeonDTO pigeonDTO, String email) {
+        User owner = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email " + email + " does not exist"));
 
         Pigeon pigeon = pigeonRepository.findById(id)
                 .orElseThrow(() -> new PigeonNotFoundException("Pigeon with ID " + id + " does not exist"));
@@ -167,9 +167,9 @@ public class PigeonServiceImpl implements PigeonService {
     }
 
     @Override
-    public void deletePigeon(Long id, String username) {
-        User owner = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Username does not exist"));
+    public void deletePigeon(Long id, String email) {
+        User owner = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email " + email + " does not exist"));
 
         Pigeon pigeon = pigeonRepository.findById(id)
                 .orElseThrow(() -> new PigeonNotFoundException("Pigeon does not exist"));
@@ -181,10 +181,10 @@ public class PigeonServiceImpl implements PigeonService {
         pigeonRepository.deleteById(id);
     }
 
-    public List<PigeonDTO> getPigeonParents(Long id, String username) {
+    public List<PigeonDTO> getPigeonParents(Long id, String email) {
         // Validate user exists
-        User owner = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Username does not exist"));
+        User owner = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email " + email + " does not exist"));
 
         // Find pigeon by ID and ensure ownership
         Pigeon pigeon = pigeonRepository.findById(id)
@@ -218,9 +218,9 @@ public class PigeonServiceImpl implements PigeonService {
     }
 
     @Override
-    public PigeonPedigreeDTO getPedigree(Long pigeonId, String username) {
-        User owner = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("Username does not exist"));
+    public PigeonPedigreeDTO getPedigree(Long pigeonId, String email) {
+        User owner = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User with email " + email + " does not exist"));
 
         Pigeon pigeon = pigeonRepository.findById(pigeonId)
                 .orElseThrow(() -> new PigeonNotFoundException("Pigeon not found"));
@@ -256,8 +256,8 @@ public class PigeonServiceImpl implements PigeonService {
     }
 
     @Override
-    public byte[] generatePedigreePdf(Long id, String username) {
-        PigeonPedigreeDTO pedigree = getPedigree(id, username);
+    public byte[] generatePedigreePdf(Long id, String email) {
+        PigeonPedigreeDTO pedigree = getPedigree(id, email);
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             PdfReader reader = new PdfReader("templates/Dovenet_pedigree_new.pdf");
@@ -297,8 +297,8 @@ public class PigeonServiceImpl implements PigeonService {
                 fillPigeonBox(pedigree.getMaternalGrandmother(), canvas, 305, 200);
             }
 
-            PigeonPedigreeDTO fatherPedigree = getPedigree(pedigree.getFather().getId(), username);
-            PigeonPedigreeDTO motherPedigree = getPedigree(pedigree.getMother().getId(), username);
+            PigeonPedigreeDTO fatherPedigree = getPedigree(pedigree.getFather().getId(), email);
+            PigeonPedigreeDTO motherPedigree = getPedigree(pedigree.getMother().getId(), email);
             if(fatherPedigree != null) {
                 if(fatherPedigree.getPaternalGrandfather() != null) {
                     fillPigeonBox(fatherPedigree.getPaternalGrandfather(), canvas, 450, 750);
@@ -357,22 +357,22 @@ public class PigeonServiceImpl implements PigeonService {
     }
 
     @Override
-    public List<String> searchRings(String q, String username) {
-        User owner = userRepository.findByUsername(username)
+    public List<String> searchRings(String q, String email) {
+        User owner = userRepository.findByEmail(email)
                 .orElseThrow();
 
         return pigeonRepository
-                .findByOwnerUsernameAndRingNumberStartingWith(username, q)
+                .findByOwnerAndRingNumberStartingWith(owner, q)
                 .stream()
                 .map(Pigeon::getRingNumber)
                 .toList();
     }
 
     @Override
-    public List<PigeonDTO> getPigeonChildren(Long id, String username) {
+    public List<PigeonDTO> getPigeonChildren(Long id, String email) {
         // Validate user exists
-        User owner = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Username does not exist"));
+        User owner = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email " + email + " does not exist"));
 
         // Find pigeon by ID
         Pigeon pigeon = pigeonRepository.findById(id)
@@ -393,8 +393,8 @@ public class PigeonServiceImpl implements PigeonService {
     }
 
     @Override
-    public List<PigeonDTO> getPigeonsInLoft(Long loftId, String username) {
-        User user = userRepository.findByUsername(username)
+    public List<PigeonDTO> getPigeonsInLoft(Long loftId, String email) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         Loft loft = loftRepository.findById(loftId)
@@ -410,8 +410,8 @@ public class PigeonServiceImpl implements PigeonService {
     }
 
     @Override
-    public List<CompetitionEntryDTO> getCompetitionsForPigeon(Long pigeonId, String username) {
-        User owner = userRepository.findByUsername(username)
+    public List<CompetitionEntryDTO> getCompetitionsForPigeon(Long pigeonId, String email) {
+        User owner = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         Pigeon pigeon = pigeonRepository.findById(pigeonId)

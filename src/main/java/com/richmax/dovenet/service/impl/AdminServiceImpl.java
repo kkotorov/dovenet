@@ -86,7 +86,7 @@ public class AdminServiceImpl implements AdminService {
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
-        userService.deleteUser(user.getUsername());
+        userService.deleteUserByEmail(user.getEmail());
     }
 
     @Override
@@ -100,14 +100,14 @@ public class AdminServiceImpl implements AdminService {
     public void expireSubscription(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
-        userService.expireSubscriptionNow(user.getUsername());
+        userService.expireSubscriptionNow(user.getEmail());
     }
 
     @Override
     public void cancelSubscription(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
-        billingService.cancelSubscription(user.getUsername());
+        billingService.cancelSubscription(user.getEmail());
     }
 
     @Override
@@ -215,7 +215,7 @@ public class AdminServiceImpl implements AdminService {
     public List<BreedingSeasonDTO> getSeasonsForUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
-        return seasonRepository.findByOwnerUsername(user.getUsername()).stream()
+        return seasonRepository.findByOwner(user).stream()
                 .map(seasonMapper::toDto)
                 .toList();
     }

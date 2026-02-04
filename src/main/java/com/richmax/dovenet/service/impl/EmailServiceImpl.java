@@ -75,8 +75,9 @@ public class EmailServiceImpl implements EmailService {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             try {
                 String token = authHeader.replace("Bearer ", "");
-                String username = jwtUtil.extractUsername(token);
-                Optional<User> user = userRepository.findByUsername(username);
+                // Use the new method and find by email
+                String emailFromToken = jwtUtil.extractEmail(token);
+                Optional<User> user = userRepository.findByEmail(emailFromToken);
                 if (user.isPresent()) {
                     userEmail = user.get().getEmail();
                 }

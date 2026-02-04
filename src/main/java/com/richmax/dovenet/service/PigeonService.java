@@ -9,33 +9,33 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 
 public interface PigeonService {
-    List<PigeonDTO> getAllPigeons(String username);
+    List<PigeonDTO> getAllPigeons(String email);
 
     PigeonDTO getPigeonById(Long id, Authentication authentication);
 
-    PigeonDTO createPigeon(PigeonDTO pigeonDTO, String username);
+    PigeonDTO createPigeon(PigeonDTO pigeonDTO, String email);
 
-    PigeonDTO updatePigeon(Long id, PigeonDTO pigeonDTO, String username);
+    PigeonDTO updatePigeon(Long id, PigeonDTO pigeonDTO, String email);
 
-    void deletePigeon(Long id, String username);
+    void deletePigeon(Long id, String email);
 
-    List<PigeonDTO> getPigeonParents(Long id, String username);
+    List<PigeonDTO> getPigeonParents(Long id, String email);
 
     PigeonDTO convertToDto(Pigeon pigeon);
 
     Pigeon convertToEntity(PigeonDTO pigeonDTO);
 
-    PigeonPedigreeDTO getPedigree(Long pigeonId, String username);
+    PigeonPedigreeDTO getPedigree(Long pigeonId, String email);
 
-    byte[] generatePedigreePdf(Long id, String username);
+    byte[] generatePedigreePdf(Long id, String email);
 
-    List<String> searchRings(String q, String username);
+    List<String> searchRings(String q, String email);
 
-    List<PigeonDTO> getPigeonChildren(Long id, String username);
+    List<PigeonDTO> getPigeonChildren(Long id, String email);
 
-    List<PigeonDTO> getPigeonsInLoft(Long loftId, String username);
+    List<PigeonDTO> getPigeonsInLoft(Long loftId, String email);
 
-    List<CompetitionEntryDTO> getCompetitionsForPigeon(Long pigeonId, String username);
+    List<CompetitionEntryDTO> getCompetitionsForPigeon(Long pigeonId, String email);
 
     PigeonDTO getPublicPigeon(Long pigeonId);
 }

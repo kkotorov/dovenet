@@ -31,10 +31,10 @@ public class LoftServiceImpl implements LoftService {
     // CREATE LOFT
     // ----------------------------------------------------
     @Override
-    public LoftDTO createLoft(LoftDTO dto, String username) {
+    public LoftDTO createLoft(LoftDTO dto, String email) {
 
-        User owner = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Username does not exist"));
+        User owner = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email " + email + " does not exist"));
 
         Loft loft = loftMapper.toEntity(dto);
         loft.setOwner(owner);
@@ -52,10 +52,10 @@ public class LoftServiceImpl implements LoftService {
     // GET ALL USER LOFTS
     // ----------------------------------------------------
     @Override
-    public List<LoftDTO> getUserLofts(String username) {
+    public List<LoftDTO> getUserLofts(String email) {
 
-        User owner = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User owner = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email " + email + " not found"));
 
         return loftRepository.findByOwnerId(owner.getId())
                 .stream()
@@ -71,10 +71,10 @@ public class LoftServiceImpl implements LoftService {
     // GET SINGLE LOFT
     // ----------------------------------------------------
     @Override
-    public LoftDTO getLoftById(Long id, String username) {
+    public LoftDTO getLoftById(Long id, String email) {
 
-        User owner = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User owner = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email " + email + " not found"));
 
         Loft loft = loftRepository.findById(id)
                 .orElseThrow(() -> new LoftNotFoundException("Loft not found"));
@@ -93,10 +93,10 @@ public class LoftServiceImpl implements LoftService {
     // UPDATE LOFT
     // ----------------------------------------------------
     @Override
-    public LoftDTO updateLoft(Long id, LoftDTO dto, String username) {
+    public LoftDTO updateLoft(Long id, LoftDTO dto, String email) {
 
-        User owner = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User owner = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email " + email + " not found"));
 
         Loft loft = loftRepository.findById(id)
                 .orElseThrow(() -> new LoftNotFoundException("Loft not found"));
@@ -127,10 +127,10 @@ public class LoftServiceImpl implements LoftService {
     // DELETE LOFT
     // ----------------------------------------------------
     @Override
-    public void deleteLoft(Long id, String username) {
+    public void deleteLoft(Long id, String email) {
 
-        User owner = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User owner = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email " + email + " not found"));
 
         Loft loft = loftRepository.findById(id)
                 .orElseThrow(() -> new LoftNotFoundException("Loft not found"));
@@ -155,6 +155,4 @@ public class LoftServiceImpl implements LoftService {
                 && user.getSubscriptionValidUntil() != null
                 && user.getSubscriptionValidUntil().isAfter(LocalDateTime.now());
     }
-
-
 }

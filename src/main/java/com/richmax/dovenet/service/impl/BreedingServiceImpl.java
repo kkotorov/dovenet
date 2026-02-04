@@ -38,16 +38,17 @@ public class BreedingServiceImpl implements BreedingService {
     // SEASONS
     // -------------------------------------------------------------
     @Override
-    public List<BreedingSeasonDTO> getSeasons(String username) {
-        return seasonRepository.findByOwnerUsername(username)
+    public List<BreedingSeasonDTO> getSeasons(String email) {
+        User user = getUser(email);
+        return seasonRepository.findByOwner(user)
                 .stream()
                 .map(breedingSeasonMapper::toDto)
                 .toList();
     }
 
     @Override
-    public BreedingSeasonDTO createSeason(BreedingSeasonDTO dto, String username) {
-        User user = getUser(username);
+    public BreedingSeasonDTO createSeason(BreedingSeasonDTO dto, String email) {
+        User user = getUser(email);
 
         BreedingSeason season = breedingSeasonMapper.toEntity(dto);
         season.setOwner(user);
@@ -56,21 +57,21 @@ public class BreedingServiceImpl implements BreedingService {
     }
 
     @Override
-    public BreedingSeasonDTO getSeason(Long id, String username) {
+    public BreedingSeasonDTO getSeason(Long id, String email) {
         BreedingSeason season = seasonRepository.findById(id)
                 .orElseThrow(() -> new BreedingSeasonNotFoundException("Breeding season not found"));
 
-        ensureOwner(season.getOwner().getUsername(), username);
+        ensureOwner(season.getOwner().getEmail(), email);
 
         return breedingSeasonMapper.toDto(season);
     }
 
     @Override
-    public BreedingSeasonDTO updateSeason(Long id, BreedingSeasonDTO dto, String username) {
+    public BreedingSeasonDTO updateSeason(Long id, BreedingSeasonDTO dto, String email) {
         BreedingSeason season = seasonRepository.findById(id)
                 .orElseThrow(() -> new BreedingSeasonNotFoundException("Breeding season not found"));
 
-        ensureOwner(season.getOwner().getUsername(), username);
+        ensureOwner(season.getOwner().getEmail(), email);
 
         if (dto.getName() != null) season.setName(dto.getName());
         if (dto.getStartDate() != null) season.setStartDate(dto.getStartDate());
@@ -80,11 +81,11 @@ public class BreedingServiceImpl implements BreedingService {
     }
 
     @Override
-    public void deleteSeason(Long id, String username) {
+    public void deleteSeason(Long id, String email) {
         BreedingSeason season = seasonRepository.findById(id)
                 .orElseThrow(() -> new BreedingSeasonNotFoundException("Season not found"));
 
-        ensureOwner(season.getOwner().getUsername(), username);
+        ensureOwner(season.getOwner().getEmail(), email);
 
         seasonRepository.delete(season);
     }
@@ -94,11 +95,11 @@ public class BreedingServiceImpl implements BreedingService {
     // PAIRS
     // -------------------------------------------------------------
     @Override
-    public List<BreedingPairDTO> getPairs(Long seasonId, String username) {
+    public List<BreedingPairDTO> getPairs(Long seasonId, String email) {
         BreedingSeason season = seasonRepository.findById(seasonId)
                 .orElseThrow(() -> new BreedingSeasonNotFoundException("Season not found"));
 
-        ensureOwner(season.getOwner().getUsername(), username);
+        ensureOwner(season.getOwner().getEmail(), email);
 
         return pairRepository.findBySeasonId(seasonId)
                 .stream()
@@ -107,25 +108,25 @@ public class BreedingServiceImpl implements BreedingService {
     }
 
     @Override
-    public BreedingPairDTO getPair(Long id, String username) {
+    public BreedingPairDTO getPair(Long id, String email) {
         BreedingPair pair = pairRepository.findById(id)
                 .orElseThrow(() -> new BreedingPairNotFoundException("Pair not found"));
 
-        ensureOwner(pair.getSeason().getOwner().getUsername(), username);
+        ensureOwner(pair.getSeason().getOwner().getEmail(), email);
 
         return breedingPairMapper.toDto(pair);
     }
 
     @Override
     @Transactional
-    public BreedingPairDTO addPair(Long seasonId, BreedingPairDTO dto, String username) {
+    public BreedingPairDTO addPair(Long seasonId, BreedingPairDTO dto, String email) {
         BreedingSeason season = seasonRepository.findById(seasonId)
                 .orElseThrow(() -> new BreedingSeasonNotFoundException("Season not found"));
 
-        ensureOwner(season.getOwner().getUsername(), username);
+        ensureOwner(season.getOwner().getEmail(), email);
 
-        Pigeon male = getOwnedPigeon(dto.getMaleId(), username);
-        Pigeon female = getOwnedPigeon(dto.getFemaleId(), username);
+        Pigeon male = getOwnedPigeon(dto.getMaleId(), email);
+        Pigeon female = getOwnedPigeon(dto.getFemaleId(), email);
 
         BreedingPair pair = breedingPairMapper.toEntity(dto);
         pair.setSeason(season);
@@ -140,22 +141,22 @@ public class BreedingServiceImpl implements BreedingService {
 
     @Override
     @Transactional
-    public BreedingPairDTO updatePair(Long id, BreedingPairDTO dto, String username) {
+    public BreedingPairDTO updatePair(Long id, BreedingPairDTO dto, String email) {
         BreedingPair pair = pairRepository.findById(id)
                 .orElseThrow(() -> new BreedingPairNotFoundException("Pair not found"));
 
-        ensureOwner(pair.getSeason().getOwner().getUsername(), username);
+        ensureOwner(pair.getSeason().getOwner().getEmail(), email);
 
         if (dto.getBreedingDate() != null) pair.setBreedingDate(dto.getBreedingDate());
         if (dto.getNotes() != null) pair.setNotes(dto.getNotes());
 
         if (dto.getMaleId() != null) {
-            Pigeon male = getOwnedPigeon(dto.getMaleId(), username);
+            Pigeon male = getOwnedPigeon(dto.getMaleId(), email);
             pair.setMalePigeon(male);
         }
 
         if (dto.getFemaleId() != null) {
-            Pigeon female = getOwnedPigeon(dto.getFemaleId(), username);
+            Pigeon female = getOwnedPigeon(dto.getFemaleId(), email);
             pair.setFemalePigeon(female);
         }
 
@@ -163,11 +164,11 @@ public class BreedingServiceImpl implements BreedingService {
     }
 
     @Override
-    public void deletePair(Long id, String username) {
+    public void deletePair(Long id, String email) {
         BreedingPair pair = pairRepository.findById(id)
                 .orElseThrow(() -> new BreedingPairNotFoundException("Pair not found"));
 
-        ensureOwner(pair.getSeason().getOwner().getUsername(), username);
+        ensureOwner(pair.getSeason().getOwner().getEmail(), email);
 
         pairRepository.delete(pair);
     }
@@ -178,13 +179,13 @@ public class BreedingServiceImpl implements BreedingService {
     // -------------------------------------------------------------
     @Override
     @Transactional
-    public BreedingPairDTO addOffspring(Long pairId, Long pigeonId, String username) {
+    public BreedingPairDTO addOffspring(Long pairId, Long pigeonId, String email) {
         BreedingPair pair = pairRepository.findById(pairId)
                 .orElseThrow(() -> new BreedingPairNotFoundException("Pair not found"));
 
-        ensureOwner(pair.getSeason().getOwner().getUsername(), username);
+        ensureOwner(pair.getSeason().getOwner().getEmail(), email);
 
-        Pigeon baby = getOwnedPigeon(pigeonId, username);
+        Pigeon baby = getOwnedPigeon(pigeonId, email);
 
         if (!pair.getOffspring().contains(baby)) {
             pair.getOffspring().add(baby);
@@ -197,22 +198,22 @@ public class BreedingServiceImpl implements BreedingService {
     // -------------------------------------------------------------
     // HELPERS
     // -------------------------------------------------------------
-    private User getUser(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+    private User getUser(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User with email " + email + " not found"));
     }
 
-    private void ensureOwner(String ownerUsername, String requester) {
-        if (!ownerUsername.equals(requester)) {
+    private void ensureOwner(String ownerEmail, String requesterEmail) {
+        if (!ownerEmail.equals(requesterEmail)) {
             throw new UnauthorizedActionException("You do not own this resource");
         }
     }
 
-    private Pigeon getOwnedPigeon(Long pigeonId, String username) {
+    private Pigeon getOwnedPigeon(Long pigeonId, String email) {
         Pigeon pigeon = pigeonRepository.findById(pigeonId)
                 .orElseThrow(() -> new PigeonNotFoundException("Pigeon not found"));
 
-        if (!pigeon.getOwner().getUsername().equals(username))
+        if (!pigeon.getOwner().getEmail().equals(email))
             throw new UnauthorizedActionException("This pigeon does not belong to you");
 
         return pigeon;
@@ -241,13 +242,13 @@ public class BreedingServiceImpl implements BreedingService {
 
     @Override
     @Transactional
-    public BreedingPairDTO removeOffspring(Long pairId, Long pigeonId, String username) {
+    public BreedingPairDTO removeOffspring(Long pairId, Long pigeonId, String email) {
         BreedingPair pair = pairRepository.findById(pairId)
                 .orElseThrow(() -> new BreedingPairNotFoundException("Pair not found"));
 
-        ensureOwner(pair.getSeason().getOwner().getUsername(), username);
+        ensureOwner(pair.getSeason().getOwner().getEmail(), email);
 
-        Pigeon baby = getOwnedPigeon(pigeonId, username);
+        Pigeon baby = getOwnedPigeon(pigeonId, email);
 
         pair.getOffspring().remove(baby);
 

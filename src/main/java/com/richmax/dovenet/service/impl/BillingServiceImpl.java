@@ -28,12 +28,12 @@ public class BillingServiceImpl implements BillingService {
     }
 
     @Override
-    public String createCheckoutSession(String username, SubscriptionType type, BillingPeriod period) {
+    public String createCheckoutSession(String email, SubscriptionType type, BillingPeriod period) {
         if (type == SubscriptionType.FREE) {
             throw new IllegalArgumentException("Invalid subscription type");
         }
 
-        User user = userService.findByUsername(username);
+        User user = userService.findByEmail(email);
         String customerId = userService.getOrCreateStripeCustomer(user);
         String priceId = stripePriceResolver.resolve(type, period);
 
@@ -67,8 +67,8 @@ public class BillingServiceImpl implements BillingService {
     }
 
     @Override
-    public void cancelSubscription(String username) {
-        User user = userService.findByUsername(username);
+    public void cancelSubscription(String email) {
+        User user = userService.findByEmail(email);
         String subscriptionId = user.getStripeSubscriptionId();
 
         if (subscriptionId == null || subscriptionId.isEmpty()) {

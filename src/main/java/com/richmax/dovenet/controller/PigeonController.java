@@ -41,8 +41,8 @@ public class PigeonController {
             @PathVariable Long id,
             @RequestBody PigeonDTO pigeonDTO,
             Authentication authentication) {
-        String username = authentication.getName();
-        return pigeonService.updatePigeon(id, pigeonDTO, username);
+        String email = authentication.getName();
+        return pigeonService.updatePigeon(id, pigeonDTO, email);
     }
 
     @DeleteMapping("/{id}")
@@ -72,14 +72,14 @@ public class PigeonController {
 
     @GetMapping("/search-rings")
     public List<String> searchRings(@RequestParam String q, Authentication authentication) {
-        String username = authentication.getName();
-        return pigeonService.searchRings(q, username);
+        String email = authentication.getName();
+        return pigeonService.searchRings(q, email);
     }
 
     @GetMapping("/{id}/children")
     public List<PigeonDTO> getPigeonChildren(@PathVariable Long id, Authentication authentication) {
-        String username = authentication.getName();
-        return pigeonService.getPigeonChildren(id, username);
+        String email = authentication.getName();
+        return pigeonService.getPigeonChildren(id, email);
     }
 
     @GetMapping("/loft/{loftId}")
