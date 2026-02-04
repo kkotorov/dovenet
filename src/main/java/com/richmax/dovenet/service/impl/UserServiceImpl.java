@@ -3,8 +3,8 @@ package com.richmax.dovenet.service.impl;
 import com.richmax.dovenet.exception.UserAlreadyExistsException;
 import com.richmax.dovenet.exception.UserNotFoundException;
 import com.richmax.dovenet.mapper.UserMapper;
+import com.richmax.dovenet.repository.*;
 import com.richmax.dovenet.repository.data.User;
-import com.richmax.dovenet.repository.UserRepository;
 import com.richmax.dovenet.service.EmailService;
 import com.richmax.dovenet.service.UserService;
 import com.richmax.dovenet.service.data.UserDTO;
@@ -26,12 +26,19 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final EmailService emailService;
+    private final CompetitionRepository competitionRepository;
+    private final LoftRepository loftRepository;
+    private final BreedingSeasonRepository breedingSeasonRepository;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper, EmailService emailService) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper, EmailService emailService,
+                           CompetitionRepository competitionRepository, LoftRepository loftRepository, BreedingSeasonRepository breedingSeasonRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
         this.emailService = emailService;
+        this.competitionRepository = competitionRepository;
+        this.loftRepository = loftRepository;
+        this.breedingSeasonRepository = breedingSeasonRepository;
     }
 
     @Override
@@ -200,12 +207,22 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Remove any transient pigeons that are not saved yet
+        // Manually delete related entities to avoid foreign key constraints
+        // 1. Competitions
+        competitionRepository.deleteByOwner(user);
+        
+        // 2. Lofts
+        loftRepository.deleteByOwner(user);
+        
+        // 3. Breeding Seasons (and pairs/offspring via cascade if configured in DB, otherwise manually)
+        breedingSeasonRepository.deleteByOwner(user);
+
+        // 4. Pigeons (handled by cascade in User entity or manual if not)
         if (user.getPigeons() != null) {
             user.getPigeons().removeIf(p -> p.getId() == null);
         }
 
-        // Now delete the user (cascade deletes any saved pigeons automatically)
+        // Now delete the user
         userRepository.delete(user);
     }
 

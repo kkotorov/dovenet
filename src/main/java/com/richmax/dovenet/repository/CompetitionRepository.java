@@ -11,4 +11,6 @@ public interface CompetitionRepository extends JpaRepository<Competition, Long> 
     List<Competition> findByOwner(User owner);
 
     List<Competition> findByOwnerId(Long ownerId);
+
+    void deleteByOwner(User owner);
 }
