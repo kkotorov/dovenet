@@ -4,6 +4,7 @@ import com.richmax.dovenet.exception.UserAlreadyExistsException;
 import com.richmax.dovenet.exception.UserNotFoundException;
 import com.richmax.dovenet.mapper.UserMapper;
 import com.richmax.dovenet.repository.*;
+import com.richmax.dovenet.repository.data.EmailChangeRequest;
 import com.richmax.dovenet.repository.data.User;
 import com.richmax.dovenet.service.EmailService;
 import com.richmax.dovenet.service.UserService;
@@ -29,9 +30,11 @@ public class UserServiceImpl implements UserService {
     private final CompetitionRepository competitionRepository;
     private final LoftRepository loftRepository;
     private final BreedingSeasonRepository breedingSeasonRepository;
+    private final EmailChangeRequestRepository emailChangeRequestRepository;
 
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper, EmailService emailService,
-                           CompetitionRepository competitionRepository, LoftRepository loftRepository, BreedingSeasonRepository breedingSeasonRepository) {
+                           CompetitionRepository competitionRepository, LoftRepository loftRepository, BreedingSeasonRepository breedingSeasonRepository,
+                           EmailChangeRequestRepository emailChangeRequestRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
@@ -39,6 +42,7 @@ public class UserServiceImpl implements UserService {
         this.competitionRepository = competitionRepository;
         this.loftRepository = loftRepository;
         this.breedingSeasonRepository = breedingSeasonRepository;
+        this.emailChangeRequestRepository = emailChangeRequestRepository;
     }
 
     @Override
@@ -95,6 +99,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User " + username + " not found"));
+    }
+
+    @Override
     public User findByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User with email " + email + " not found"));
@@ -106,36 +116,57 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User changeEmail(String email, String newEmail, String currentPassword) {
-        User user = findByEmail(email);
+    public void initiateEmailChange(String currentEmail, String newEmail, String password) {
+        User user = findByEmail(currentEmail);
 
         // Verify password
-        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new IllegalArgumentException("Invalid password");
         }
 
-        // Check if email is already used
+        // Check if new email is already used
         if (userRepository.findByEmail(newEmail).isPresent()) {
             throw new IllegalArgumentException("Email already in use");
         }
 
-        // Update email
-        user.setEmail(newEmail);
+        // Create change request
+        EmailChangeRequest request = new EmailChangeRequest();
+        request.setUser(user);
+        request.setNewEmail(newEmail);
+        request.setToken(UUID.randomUUID().toString());
+        request.setExpiryDate(LocalDateTime.now().plusHours(1));
 
-        // Reset verification state
-        user.setEmailVerified(false);
-        user.setVerificationToken(null);
-        user.setVerificationTokenExpiry(null);
+        emailChangeRequestRepository.save(request);
 
-        // Save updated user
-        userRepository.save(user);
-
-        // Send new verification email
-        this.generateAndSendVerificationEmail(user);
-
-        return user;
+        // Send confirmation to NEW email
+        emailService.sendEmailChangeConfirmation(newEmail, request.getToken());
     }
 
+    @Override
+    @Transactional
+    public boolean finalizeEmailChange(String token) {
+        EmailChangeRequest request = emailChangeRequestRepository.findByToken(token);
+        
+        if (request == null || request.getExpiryDate().isBefore(LocalDateTime.now())) {
+            return false;
+        }
+
+        User user = request.getUser();
+        String oldEmail = user.getEmail();
+        
+        // Update email
+        user.setEmail(request.getNewEmail());
+        user.setEmailVerified(true); // New email is verified by clicking the link
+        userRepository.save(user);
+
+        // Notify OLD email
+        emailService.sendEmailChangeNotification(oldEmail);
+
+        // Clean up request
+        emailChangeRequestRepository.delete(request);
+        
+        return true;
+    }
 
     @Override
     public User changePassword(String email, String oldPassword, String newPassword) {
@@ -147,7 +178,12 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        
+        // Notify user
+        emailService.sendPasswordChangedNotification(email);
+        
+        return savedUser;
     }
 
     @Override
@@ -188,6 +224,10 @@ public class UserServiceImpl implements UserService {
         user.setResetToken(null);
         user.setResetTokenExpiry(null);
         userRepository.save(user);
+        
+        // Notify user
+        emailService.sendPasswordChangedNotification(user.getEmail());
+
         return true;
     }
 

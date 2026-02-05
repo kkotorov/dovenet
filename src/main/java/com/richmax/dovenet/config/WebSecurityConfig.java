@@ -65,7 +65,7 @@ public class WebSecurityConfig {
                 .cors().and() // enable CORS
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/users/register", "/api/auth/login", "/api/users/forgot-password", "/api/users/reset-password", "/api/users/{username}", "/api/pigeons/public/**", "/api/webhooks/stripe", "/api/email/contact-support").permitAll()
+                .requestMatchers("/api/users/register", "/api/auth/login", "/api/users/forgot-password", "/api/users/reset-password", "/api/users/finalize-email-change", "/api/users/{username}", "/api/pigeons/public/**", "/api/webhooks/stripe", "/api/email/contact-support").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN") // Secure admin endpoints
                 .anyRequest().authenticated()
                 .and()

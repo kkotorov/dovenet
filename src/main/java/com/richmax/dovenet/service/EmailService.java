@@ -11,4 +11,10 @@ public interface EmailService {
     void sendSupportEmail(String fromEmail, String subject, String message);
 
     void handleSupportRequest(String authHeader, ContactSupportRequest request);
+
+    void sendEmailChangeConfirmation(String newEmail, String token);
+    
+    void sendEmailChangeNotification(String oldEmail);
+
+    void sendPasswordChangedNotification(String email);
 }

@@ -101,4 +101,43 @@ public class EmailServiceImpl implements EmailService {
 
         sendSupportEmail(userEmail, request.getSubject(), request.getMessage());
     }
+
+    @Override
+    public void sendEmailChangeConfirmation(String newEmail, String token) {
+        String confirmLink = "https://www.dovenet.eu/confirm-email-change?token=" + token;
+        String subject = "Confirm Email Change";
+        String body = "Hello,\n\n"
+                + "We received a request to change your Dovenet account email to this address.\n"
+                + "Please confirm this change by clicking the link below:\n\n"
+                + confirmLink + "\n\n"
+                + "This link will expire in 1 hour.\n\n"
+                + "Best regards,\n"
+                + "The Dovenet Team";
+
+        sendEmail(newEmail, subject, body);
+    }
+
+    @Override
+    public void sendEmailChangeNotification(String oldEmail) {
+        String subject = "Security Alert: Email Changed";
+        String body = "Hello,\n\n"
+                + "The email address associated with your Dovenet account has been changed.\n"
+                + "If you did not authorize this change, please contact support immediately. https://www.dovenet.eu/contact\n\n"
+                + "Best regards,\n"
+                + "The Dovenet Team";
+
+        sendEmail(oldEmail, subject, body);
+    }
+
+    @Override
+    public void sendPasswordChangedNotification(String email) {
+        String subject = "Security Alert: Password Changed";
+        String body = "Hello,\n\n"
+                + "The password for your Dovenet account has just been changed.\n"
+                + "If you did not make this change, please contact support immediately. - https://www.dovenet.eu/contact\n\n"
+                + "Best regards,\n"
+                + "The Dovenet Team";
+
+        sendEmail(email, subject, body);
+    }
 }

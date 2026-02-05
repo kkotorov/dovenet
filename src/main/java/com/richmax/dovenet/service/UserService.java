@@ -20,12 +20,17 @@ public interface UserService {
     void generateAndSendVerificationEmail(User user);
 
     boolean verifyEmail(String token);
-    
+
+    User findByUsername(String username);
+
     User findByEmail(String email);
 
     UserDTO convertToDto(User user);
 
-    User changeEmail(String email, String newEmail, String currentPassword);
+    // New secure email change flow
+    void initiateEmailChange(String currentEmail, String newEmail, String password);
+    
+    boolean finalizeEmailChange(String token);
 
     User changePassword(String email, String oldPassword, String newPassword);
 
@@ -44,5 +49,6 @@ public interface UserService {
 
     boolean hasActiveSubscription(User user);
 
+    // FOR TESTING ONLY
     void expireSubscriptionNow(String email);
 }

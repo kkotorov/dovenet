@@ -7,11 +7,13 @@ import com.richmax.dovenet.security.JwtUtil;
 import com.richmax.dovenet.service.UserService;
 import com.richmax.dovenet.service.data.UserDTO;
 import com.richmax.dovenet.types.SubscriptionType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -71,11 +73,21 @@ public class UserController {
         return userService.convertToDto(user);
     }
 
-    @PatchMapping("/me/change-email")
-    public ResponseEntity<UserDTO> changeEmail(Authentication authentication,
-                                               @RequestBody ChangeEmailRequest request) {
-        User updatedUser = userService.changeEmail(authentication.getName(), request.getNewEmail(), request.getPassword());
-        return ResponseEntity.ok(userService.convertToDto(updatedUser));
+    @PostMapping("/me/initiate-email-change")
+    public ResponseEntity<String> initiateEmailChange(Authentication authentication,
+                                                      @RequestBody ChangeEmailRequest request) {
+        userService.initiateEmailChange(authentication.getName(), request.getNewEmail(), request.getPassword());
+        return ResponseEntity.ok("Confirmation email sent to " + request.getNewEmail());
+    }
+
+    @GetMapping("/finalize-email-change")
+    public ResponseEntity<String> finalizeEmailChange(@RequestParam("token") String token) {
+        boolean success = userService.finalizeEmailChange(token);
+        if (success) {
+            return ResponseEntity.ok("Email changed successfully. Please log in with your new email.");
+        } else {
+            return ResponseEntity.badRequest().body("Invalid or expired token.");
+        }
     }
 
     @PatchMapping("/me/change-password")
